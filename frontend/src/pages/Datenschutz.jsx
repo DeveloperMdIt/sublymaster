@@ -67,21 +67,32 @@ const Datenschutz = () => {
                             Wir hosten die Inhalte unserer Website bei folgendem Anbieter:
                         </p>
 
-                        <h3 className="text-lg font-semibold text-gray-800 mt-4 mb-2">Externes Hosting</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 mt-4 mb-2">Netcup</h3>
                         <p>
-                            Diese Website wird extern gehostet. Die personenbezogenen Daten, die auf dieser Website erfasst werden,
-                            werden auf den Servern des Hosters / der Hoster gespeichert. Hierbei kann es sich v.a. um IP-Adressen,
-                            Kontaktanfragen, Meta- und Kommunikationsdaten, Vertragsdaten, Kontaktdaten, Namen, Websitezugriffe
-                            und sonstige Daten, die über eine Website generiert werden, handeln.
+                            Anbieter ist die netcup GmbH, Daimlerstraße 25, 76185 Karlsruhe, Deutschland.
                         </p>
                         <p className="mt-2">
-                            Das externe Hosting erfolgt zum Zwecke der Vertragserfüllung gegenüber unseren potenziellen und
-                            bestehenden Kunden (Art. 6 Abs. 1 lit. b DSGVO) und im Interesse einer sicheren, schnellen und
-                            effizienten Bereitstellung unseres Online-Angebots durch einen professionellen Anbieter (Art. 6 Abs. 1 lit. f DSGVO).
+                            Details entnehmen Sie der Datenschutzerklärung von Netcup:
+                            <a href="https://www.netcup.de/kontakt/datenschutzerklaerung.php" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline ml-1">
+                                https://www.netcup.de/kontakt/datenschutzerklaerung.php
+                            </a>
                         </p>
                         <p className="mt-2">
-                            Unser Hoster wird Ihre Daten nur insoweit verarbeiten, wie dies zur Erfüllung seiner Leistungspflichten
-                            erforderlich ist und unsere Weisungen in Bezug auf diese Daten befolgen.
+                            Die Verwendung von Netcup erfolgt auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Wir haben ein
+                            berechtigtes Interesse an einer möglichst zuverlässigen Darstellung unserer Website. Sofern eine
+                            entsprechende Einwilligung abgefragt wurde, erfolgt die Verarbeitung ausschließlich auf Grundlage
+                            von Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TTDSG, soweit die Einwilligung die Speicherung
+                            von Cookies oder den Zugriff auf Informationen im Endgerät des Nutzers (z. B. Device-Fingerprinting)
+                            im Sinne des TTDSG umfasst. Die Einwilligung ist jederzeit widerrufbar.
+                        </p>
+                        <p className="mt-2">
+                            <strong>Serverstandort:</strong> Deutschland
+                        </p>
+                        <p className="mt-2">
+                            Die personenbezogenen Daten, die auf dieser Website erfasst werden, werden auf den Servern von
+                            Netcup in Deutschland gespeichert. Hierbei kann es sich v.a. um IP-Adressen, Kontaktanfragen,
+                            Meta- und Kommunikationsdaten, Vertragsdaten, Kontaktdaten, Namen, Websitezugriffe und sonstige
+                            Daten, die über eine Website generiert werden, handeln.
                         </p>
                     </section>
 
