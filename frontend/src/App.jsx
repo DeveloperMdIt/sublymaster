@@ -7,6 +7,10 @@ import RegisterPage from './RegisterPage';
 import AdminDashboard from './AdminDashboard';
 import PrintSuccess from './pages/PrintSuccess';
 import PrintHistory from './pages/PrintHistory';
+import Impressum from './pages/Impressum';
+import Datenschutz from './pages/Datenschutz';
+import AGB from './pages/AGB';
+import Footer from './components/Footer';
 import { Logo } from './components/Logo';
 import './App.css';
 
@@ -63,8 +67,12 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/print/success" element={<PrintSuccess />} />
               <Route path="/dashboard/history" element={<PrintHistory />} />
+              <Route path="/impressum" element={<Impressum />} />
+              <Route path="/datenschutz" element={<Datenschutz />} />
+              <Route path="/agb" element={<AGB />} />
             </Routes>
           </main>
+          <Footer />
         </div>
       </Router>
     </AuthProvider>
