@@ -1,0 +1,56 @@
+name: Deploy to Netcup
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Ermöglicht manuelles Triggern
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🚀 Deploy to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: ${{ secrets.SSH_PORT || 22 }}
+        script: |
+          cd /var/www/sublymaster
+          
+          # Git Pull
+          echo "📥 Pulling latest code..."
+          git pull origin main
+          
+          # Backend Deployment
+          echo "🔧 Deploying Backend..."
+          cd backend
+          npm install --production
+          mkdir -p logs
+          pm2 restart sublymaster-backend || pm2 start ecosystem.config.js
+          
+          # Frontend Deployment
+          echo "🎨 Deploying Frontend..."
+          cd ../frontend
+          npm install
+          npm run build
+          
+          # Nginx Reload
+          echo "🔄 Reloading Nginx..."
+          sudo systemctl reload nginx || true
+          
+          echo "✅ Deployment completed!"
+          pm2 status
+    
+    - name: 📊 Deployment Status
+      if: success()
+      run: echo "✅ Deployment to sublymaster.de successful!"
+    
+    - name: ❌ Deployment Failed
+      if: failure()
+      run: echo "❌ Deployment failed! Check logs."
