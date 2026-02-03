@@ -28,21 +28,35 @@ const Navigation = () => {
           <Logo className="text-white" />
         </Link>
         <nav className="flex gap-4 text-sm font-medium items-center">
-          <Link to="/editor" className="hover:text-indigo-300">Editor</Link>
-
-          {user && user.role === 'admin' && (
-            <Link to="/admin" className="text-yellow-400 hover:text-yellow-300 font-bold">Admin</Link>
-          )}
-
           {user ? (
             <>
-              <span className="text-gray-300">Hallo, {user.email}</span>
-              <button onClick={logout} className="hover:text-red-300">Logout</button>
+              <Link to="/editor" className="hover:text-indigo-300">Editor</Link>
+
+              {user.role === 'admin' && (
+                <Link to="/admin" className="text-yellow-400 hover:text-yellow-300 font-bold">Admin</Link>
+              )}
+
+              <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-600">
+                <div className="text-gray-300">
+                  <span className="font-semibold">{user.email}</span>
+                  {user.subscription && (
+                    <span className="ml-2 text-xs bg-indigo-600 px-2 py-1 rounded">
+                      {user.subscription.plan}
+                    </span>
+                  )}
+                  {user.credits !== undefined && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      {user.credits} Credits
+                    </span>
+                  )}
+                </div>
+                <button onClick={logout} className="hover:text-red-300">Logout</button>
+              </div>
             </>
           ) : (
             <>
               <Link to="/login" className="hover:text-indigo-300">Login</Link>
-              <Link to="/register" className="bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-500">Konto erstellen</Link>
+              <Link to="/editor" className="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-500">Kostenlos testen</Link>
             </>
           )}
         </nav>
