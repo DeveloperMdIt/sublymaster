@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom'; // added 
 import { Check, X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import Modal from './components/Modal';
+import API_ENDPOINTS from './config/api';
 
 const RegisterPage = () => {
     const [searchParams] = useSearchParams();
@@ -39,7 +40,7 @@ const RegisterPage = () => {
     const completeRegistration = async (selectedPlan) => {
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch(API_ENDPOINTS.register, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

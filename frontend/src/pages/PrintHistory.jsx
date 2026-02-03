@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Calendar, FileImage, Layers } from 'lucide-react';
+import API_ENDPOINTS from '../config/api';
 
 const PrintHistory = () => {
     const { token } = useAuth();
@@ -11,7 +12,7 @@ const PrintHistory = () => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const res = await fetch('http://localhost:3000/api/history', {
+                const res = await fetch(API_ENDPOINTS.history, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Modal from './components/Modal';
+import API_ENDPOINTS from './config/api';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ const LoginPage = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:3000/api/login', {
+            const response = await fetch(API_ENDPOINTS.login, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
