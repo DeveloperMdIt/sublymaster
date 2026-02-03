@@ -45,10 +45,10 @@ const AdminDashboard = () => {
         if (token) {
             setLoading(true);
             Promise.all([
-                fetchWithAuth('http://localhost:3000/api/admin/users'),
-                fetchWithAuth('http://localhost:3000/api/admin/stats'),
-                fetchWithAuth('http://localhost:3000/api/admin/settings'),
-                fetchWithAuth('http://localhost:3000/api/admin/plans')
+                fetchWithAuth('/api/admin/users'),
+                fetchWithAuth('/api/admin/stats'),
+                fetchWithAuth('/api/admin/settings'),
+                fetchWithAuth('/api/admin/plans')
             ])
                 .then(async ([usersRes, statsRes, settingsRes, plansRes]) => {
                     // If any request failed due to auth, logout handles it, and we get null
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
     const handleUpdateUser = async () => {
         if (!editingUser) return;
         try {
-            const res = await fetchWithAuth(`http://localhost:3000/api/admin/users/${editingUser.id}`, {
+            const res = await fetchWithAuth(`/api/admin/users/${editingUser.id}`, {
                 method: 'PUT',
                 body: JSON.stringify(editForm)
             });
@@ -110,7 +110,7 @@ const AdminDashboard = () => {
                 showNotify('Benutzer aktualisiert', 'success');
                 setEditingUser(null);
                 // Refresh list
-                const refresh = await fetchWithAuth('http://localhost:3000/api/admin/users');
+                const refresh = await fetchWithAuth('/api/admin/users');
                 if (refresh && refresh.ok) setUsers(await refresh.json());
             } else {
                 showNotify('Fehler beim Aktualisieren', 'error');
@@ -130,7 +130,7 @@ const AdminDashboard = () => {
         if (!userToDelete) return;
 
         try {
-            const res = await fetchWithAuth(`http://localhost:3000/api/admin/users/${userToDelete.id}`, {
+            const res = await fetchWithAuth(`/api/admin/users/${userToDelete.id}`, {
                 method: 'DELETE'
             });
             if (!res) return;
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
     const handleSaveSettings = async () => {
         setIsSaving(true);
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/admin/settings', {
+            const res = await fetchWithAuth('/api/admin/settings', {
                 method: 'POST',
                 body: JSON.stringify(settings)
             });
@@ -168,7 +168,7 @@ const AdminDashboard = () => {
     const handleTestStripe = async () => {
         setIsTesting(true);
         try {
-            const res = await fetchWithAuth('http://localhost:3000/api/admin/test-stripe', {
+            const res = await fetchWithAuth('/api/admin/test-stripe', {
                 method: 'POST',
                 body: JSON.stringify({ stripeSecretKey: settings.stripeSecretKey })
             });
@@ -198,7 +198,7 @@ const AdminDashboard = () => {
 
     const handleSavePlan = async () => {
         console.log("Saving Plan...", planForm);
-        const url = editingPlan ? `http://localhost:3000/api/admin/plans/${editingPlan.id}` : 'http://localhost:3000/api/admin/plans';
+        const url = editingPlan ? `/api/admin/plans/${editingPlan.id}` : '/api/admin/plans';
         const method = editingPlan ? 'PUT' : 'POST';
 
         // Ensure numbers
@@ -221,7 +221,7 @@ const AdminDashboard = () => {
             if (res.ok) {
                 showNotify('Plan gespeichert', 'success');
                 setIsPlanModalOpen(false);
-                const refresh = await fetchWithAuth('http://localhost:3000/api/admin/plans');
+                const refresh = await fetchWithAuth('/api/admin/plans');
                 if (refresh && refresh.ok) setPlans(await refresh.json());
             } else {
                 const errData = await res.json();
@@ -236,7 +236,7 @@ const AdminDashboard = () => {
 
     const togglePlanStatus = async (plan) => {
         try {
-            const res = await fetchWithAuth(`http://localhost:3000/api/admin/plans/${plan.id}`, {
+            const res = await fetchWithAuth(`/api/admin/plans/${plan.id}`, {
                 method: 'PUT',
                 body: JSON.stringify({ ...plan, is_active: plan.is_active ? 0 : 1 })
             });

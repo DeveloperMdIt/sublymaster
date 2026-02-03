@@ -68,7 +68,7 @@ const CanvasEditor = () => {
     useEffect(() => {
         if (token) {
             // Load templates
-            fetch('http://localhost:3000/api/templates', {
+            fetch('/api/templates', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -124,7 +124,7 @@ const CanvasEditor = () => {
     }, []); // Run ONLY on mount - prevents canvas reset when user object updates after saving offset
 
     const loadProjects = () => {
-        fetch('http://localhost:3000/api/projects', {
+        fetch('/api/projects', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -138,7 +138,7 @@ const CanvasEditor = () => {
     // Load User Settings (Offset)
     useEffect(() => {
         if (token) {
-            fetch('http://localhost:3000/api/settings', {
+            fetch('/api/settings', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -156,7 +156,7 @@ const CanvasEditor = () => {
             return;
         }
 
-        fetch('http://localhost:3000/api/user/profile', {
+        fetch('/api/user/profile', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ default_offset: offset })
@@ -196,7 +196,7 @@ const CanvasEditor = () => {
         });
 
         try {
-            const res = await fetch('http://localhost:3000/api/projects', {
+            const res = await fetch('/api/projects', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -270,7 +270,7 @@ const CanvasEditor = () => {
 
     const loadProject = async (projectId) => {
         try {
-            const res = await fetch(`http://localhost:3000/api/projects/${projectId}`, {
+            const res = await fetch(`/api/projects/${projectId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -370,7 +370,7 @@ const CanvasEditor = () => {
         if (!projectToDelete) return;
 
         try {
-            const res = await fetch(`http://localhost:3000/api/projects/${projectToDelete}`, {
+            const res = await fetch(`/api/projects/${projectToDelete}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -478,7 +478,7 @@ const CanvasEditor = () => {
         const logPrint = async () => {
             if (!token) return;
             try {
-                await fetch('http://localhost:3000/api/print/log', {
+                await fetch('/api/print/log', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
@@ -509,7 +509,7 @@ const CanvasEditor = () => {
 
         if (token) {
             try {
-                const res = await fetch('http://localhost:3000/api/templates', {
+                const res = await fetch('/api/templates', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1164,7 +1164,7 @@ const CanvasEditor = () => {
                         showNotify("Danke! Wir merken uns das.", "success");
                         // Log success to Community Database
                         if (token) {
-                            fetch('http://localhost:3000/api/printer/feedback', {
+                            fetch('/api/printer/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -1183,7 +1183,7 @@ const CanvasEditor = () => {
                         showNotify("Öffne Kalibrierung...", "info");
                         // Log failure/adjustment needed
                         if (token) {
-                            fetch('http://localhost:3000/api/printer/feedback', {
+                            fetch('/api/printer/feedback', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
