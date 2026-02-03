@@ -11,6 +11,7 @@ import Impressum from './pages/Impressum';
 import Datenschutz from './pages/Datenschutz';
 import AGB from './pages/AGB';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 import { Logo } from './components/Logo';
 import './App.css';
 
@@ -70,6 +71,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="App min-h-screen bg-gray-50 flex flex-col">
           <Navigation />
           <main className="flex-1">
