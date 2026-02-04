@@ -477,6 +477,43 @@ app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
     }
 });
 
+// Get subscription plans
+app.get('/api/admin/plans', authenticateAdmin, async (req, res) => {
+    try {
+        const plans = await db.getAll('SELECT * FROM plans ORDER BY id');
+        res.json(plans || [
+            { id: 1, name: 'Free', price: 0, credits: 10 },
+            { id: 2, name: 'Pro', price: 9.99, credits: 100 },
+            { id: 3, name: 'Business', price: 29.99, credits: 500 }
+        ]);
+    } catch (err) {
+        console.error('Get plans error:', err);
+        // Return default plans if table doesn't exist
+        res.json([
+            { id: 1, name: 'Free', price: 0, credits: 10 },
+            { id: 2, name: 'Pro', price: 9.99, credits: 100 },
+            { id: 3, name: 'Business', price: 29.99, credits: 500 }
+        ]);
+    }
+});
+
+// Update plan
+app.put('/api/admin/plans/:id', authenticateAdmin, async (req, res) => {
+    const { name, price, credits } = req.body;
+    const { id } = req.params;
+    
+    try {
+        await db.run(
+            'UPDATE plans SET name = COALESCE($1, name), price = COALESCE($2, price), credits = COALESCE($3, credits) WHERE id = $4',
+            [name, price, credits, id]
+        );
+        res.json({ message: 'Plan updated' });
+    } catch (err) {
+        console.error('Update plan error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============================================
 // TEMPLATES ENDPOINT
 // ============================================
