@@ -127,15 +127,15 @@ export default function UserProfile() {
                         {user?.role === 'admin' || user?.role === 'ADMIN' ? 'Zurück zum Admin-Dashboard' : 'Zurück zum Editor'}
                     </button>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                        <div>
-                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Mein Profil</h1>
-                            <p className="text-gray-500 mt-2 flex items-center gap-3">
+                        <div className="flex flex-col items-start text-left">
+                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-none mb-3">Mein Profil</h1>
+                            <div className="flex flex-wrap items-center gap-2 text-gray-500">
                                 <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
                                     KD-NR: {profile.customer_number || 'Neu'}
                                 </span>
-                                <span className="text-gray-300">|</span>
+                                <span className="text-gray-300 mx-1">|</span>
                                 <span className="text-base font-medium">{profile.email}</span>
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +155,13 @@ export default function UserProfile() {
                                 <h3 className="text-2xl font-black text-gray-900">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
                             </div>
                         </div>
-                        <button className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95">Upgrade</button>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/plans')}
+                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
+                        >
+                            Upgrade
+                        </button>
                     </div>
 
                     <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
@@ -168,7 +174,13 @@ export default function UserProfile() {
                                 <h3 className="text-2xl font-black text-gray-900">{profile.credits || 0} <span className="text-sm font-medium text-gray-400">Credits</span></h3>
                             </div>
                         </div>
-                        <button className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors text-sm">Transaktionen</button>
+                        <button
+                            type="button"
+                            onClick={() => navigate('/transactions')}
+                            className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors text-sm"
+                        >
+                            Transaktionen
+                        </button>
                     </div>
                 </div>
 
