@@ -98,7 +98,7 @@ const CanvasEditor = () => {
                         // Only show non-standard templates in "My Profiles"
                         // (Standard templates are handled by predefined list)
                         const normalized = data
-                            .filter(t => t.is_standard === false && t.created_by !== null)
+                            .filter(t => t.is_standard === false && t.created_by !== null && t.created_by !== 'null' && t.created_by !== '')
                             .map(t => ({
                                 id: t.id,
                                 key: `custom_${t.id}`,
