@@ -522,9 +522,9 @@ app.put('/api/admin/plans/:id', authenticateAdmin, async (req, res) => {
 app.get('/api/templates', (req, res) => {
     // Templates in pixels (1mm = 4px for screen display)
     const templates = [
-        { id: 'mug', name: 'Tasse (Standard)', width: 840, height: 360 },  // 210x90mm
-        { id: 'bottle', name: 'Flasche', width: 720, height: 480 },        // 180x120mm
-        { id: 'shirt', name: 'T-Shirt', width: 1000, height: 1200 }        // 250x300mm
+        { id: 'mug', name: 'Tasse (Standard)', width: 800, height: 380 },   // 200x95mm
+        { id: 'bottle', name: 'Flasche', width: 720, height: 480 },         // 180x120mm
+        { id: 'shirt', name: 'T-Shirt', width: 1000, height: 1200 }         // 250x300mm
     ];
     res.json(templates);
 });
