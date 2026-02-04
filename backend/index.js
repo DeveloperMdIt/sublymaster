@@ -515,22 +515,205 @@ app.put('/api/admin/plans/:id', authenticateAdmin, async (req, res) => {
 });
 
 // ============================================
+// ADMIN - TEMPLATE MANAGEMENT
+// ============================================
+
+// Get all templates + custom template analytics
+app.get('/api/admin/templates', authenticateAdmin, async (req, res) => {
+    try {
+        // Standard-Templates
+        const standardTemplates = await db.getAll(
+            'SELECT * FROM templates WHERE is_standard = true ORDER BY name'
+        );
+        
+        // Custom-Template-Analyse (gruppiert nach Größe)
+        const customAnalysis = await db.getAll(`
+            SELECT 
+                width, 
+                height,
+                COUNT(DISTINCT created_by) as user_count,
+                COUNT(*) as template_count,
+                array_agg(DISTINCT name) as names
+            FROM templates 
+            WHERE is_standard = false
+            GROUP BY width, height
+            ORDER BY user_count DESC, template_count DESC
+            LIMIT 20
+        `);
+        
+        res.json({ standardTemplates, customAnalysis });
+    } catch (err) {
+        console.error('Get admin templates error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create new standard template
+app.post('/api/admin/templates', authenticateAdmin, async (req, res) => {
+    const { name, width, height } = req.body;
+    try {
+        await db.run(
+            'INSERT INTO templates (name, width, height, is_standard, created_by) VALUES ($1, $2, $3, true, $4)',
+            [name, width, height, req.user.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Create template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update template
+app.put('/api/admin/templates/:id', authenticateAdmin, async (req, res) => {
+    const { name, width, height } = req.body;
+    try {
+        await db.run(
+            'UPDATE templates SET name = $1, width = $2, height = $3, updated_at = NOW() WHERE id = $4',
+            [name, width, height, req.params.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Update template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete template
+app.delete('/api/admin/templates/:id', authenticateAdmin, async (req, res) => {
+    try {
+        await db.run('DELETE FROM templates WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Delete template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// TEMPORARY: Run templates migration
+app.get('/api/admin/migrate-templates', authenticateAdmin, async (req, res) => {
+    try {
+        // Create templates table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS templates (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100) NOT NULL,
+                width INTEGER NOT NULL,
+                height INTEGER NOT NULL,
+                is_standard BOOLEAN DEFAULT false,
+                created_by INTEGER REFERENCES users(id),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Create indexes
+        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_standard ON templates(is_standard)`);
+        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_size ON templates(width, height)`);
+        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(created_by)`);
+        
+        // Insert initial templates
+        await db.run(`
+            INSERT INTO templates (name, width, height, is_standard) 
+            SELECT * FROM (VALUES
+                ('Tasse (Standard)', 800, 380, true),
+                ('Flasche', 720, 480, true),
+                ('T-Shirt', 1000, 1200, true)
+            ) AS v(name, width, height, is_standard)
+            WHERE NOT EXISTS (
+                SELECT 1 FROM templates WHERE is_standard = true LIMIT 1
+            )
+        `);
+        
+        // Add columns to projects
+        await db.run(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS template_width INTEGER`);
+        await db.run(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS template_height INTEGER`);
+        
+        res.json({ success: true, message: 'Migration completed' });
+    } catch (err) {
+        console.error('Migration error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Promote custom template to standard
+app.post('/api/admin/templates/promote', authenticateAdmin, async (req, res) => {
+    const { width, height, name } = req.body;
+    try {
+        await db.run(
+            'INSERT INTO templates (name, width, height, is_standard, created_by) VALUES ($1, $2, $3, true, $4)',
+            [name, width, height, req.user.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Promote template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ============================================
 // TEMPLATES ENDPOINT
 // ============================================
 
 
-app.get('/api/templates', (req, res) => {
-    // Templates in pixels (1mm = 4px for screen display)
-    const templates = [
-        { id: 'mug', name: 'Tasse (Standard)', width: 800, height: 380 },   // 200x95mm
-        { id: 'bottle', name: 'Flasche', width: 720, height: 480 },         // 180x120mm
-        { id: 'shirt', name: 'T-Shirt', width: 1000, height: 1200 }         // 250x300mm
-    ];
-    res.json(templates);
+
+app.get('/api/templates', authenticateToken, async (req, res) => {
+    try {
+        // Standard-Templates (für alle sichtbar)
+        const standardTemplates = await db.getAll(
+            'SELECT id, name, width, height FROM templates WHERE is_standard = true ORDER BY name'
+        );
+        
+        // User-eigene Custom-Templates
+        const customTemplates = await db.getAll(
+            'SELECT id, name, width, height FROM templates WHERE created_by = $1 AND is_standard = false ORDER BY name',
+            [req.user.id]
+        );
+        
+        res.json([...standardTemplates, ...customTemplates]);
+    } catch (err) {
+        console.error('Get templates error:', err);
+        // Fallback zu Standard-Templates wenn Tabelle nicht existiert
+        res.json([
+            { id: 'mug', name: 'Tasse (Standard)', width: 800, height: 380 },
+            { id: 'bottle', name: 'Flasche', width: 720, height: 480 },
+            { id: 'shirt', name: 'T-Shirt', width: 1000, height: 1200 }
+        ]);
+    }
 });
 
 // ============================================
 // PRINT HISTORY ENDPOINT
+// ============================================
+
+// Create custom template (user)
+app.post('/api/templates', authenticateToken, async (req, res) => {
+    const { name, width, height } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO templates (name, width, height, is_standard, created_by) VALUES ($1, $2, $3, false, $4) RETURNING id',
+            [name, width, height, req.user.id]
+        );
+        res.json({ success: true, id: result.rows[0].id });
+    } catch (err) {
+        console.error('Create custom template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete custom template (user)
+app.delete('/api/templates/:id', authenticateToken, async (req, res) => {
+    try {
+        await db.run(
+            'DELETE FROM templates WHERE id = $1 AND created_by = $2 AND is_standard = false',
+            [req.params.id, req.user.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Delete custom template error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // ============================================
 
 app.get('/api/history', authenticateToken, async (req, res) => {

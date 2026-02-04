@@ -518,8 +518,7 @@ const CanvasEditor = () => {
                     body: JSON.stringify({
                         name: newProfile.name,
                         width: widthPx,
-                        height: heightPx,
-                        data: {} // Empty data for now
+                        height: heightPx
                     })
                 });
 

@@ -5,6 +5,7 @@ import { Users, LayoutDashboard, CreditCard, Settings, FileText, CheckCircle, Al
 import Toast from './components/Toast';
 import AdminLayout from './components/admin/AdminLayout';
 import PrinterAnalytics from './components/admin/PrinterAnalytics';
+import TemplateManagement from './components/admin/TemplateManagement';
 
 const AdminDashboard = () => {
     const { user, token, logout } = useAuth();
@@ -352,6 +353,8 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 );
+            case 'templates':
+                return <TemplateManagement />;
             default: return <div>Wähle einen Menüpunkt</div>;
         }
     };
