@@ -137,7 +137,7 @@ export default function UserProfile() {
                 </div>
             )}
 
-            <div className="container mx-auto px-6 py-10 max-w-7xl">
+            <div className="container mx-auto px-6 py-10 max-w-7xl text-left">
 
                 {/* TOP CARDS: Subscription & Credits */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -184,10 +184,10 @@ export default function UserProfile() {
                     </div>
                 </div>
 
-                <form onSubmit={handleSaveProfile} className="space-y-8">
+                <form onSubmit={handleSaveProfile} className="space-y-8 text-left">
                     <div className="grid grid-cols-12 gap-6 items-start">
                         {/* LINKS (2/3) */}
-                        <section className="col-span-12 sm:col-span-8">
+                        <section className="col-span-12 md:col-span-8">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
@@ -328,7 +328,7 @@ export default function UserProfile() {
                         </section>
 
                         {/* RECHTS (1/3) */}
-                        <aside className="col-span-12 sm:col-span-4 flex flex-col gap-6">
+                        <aside className="col-span-12 md:col-span-4 flex flex-col gap-6">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
