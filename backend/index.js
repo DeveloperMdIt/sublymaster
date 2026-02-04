@@ -103,13 +103,20 @@ app.post('/api/register', async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Generate Customer Number
+        const seq = await db.getOne("SELECT nextval('customer_number_seq') as num");
+        const kdNr = `KD-${String(seq.num).padStart(6, '0')}`;
+
         // Insert user
         const result = await db.query(
-            'INSERT INTO users (email, password, role, plan_id, credits) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-            [email, hashedPassword, 'user', plan_id, initial_credits]
+            'INSERT INTO users (email, password, role, plan_id, credits, customer_number, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+            [email, hashedPassword, 'user', plan_id, initial_credits, kdNr, true] // Default verified true for now until email system is active
         );
 
         const userId = result.rows[0].id;
+        
+        // Create initial profile
+        await db.run('INSERT INTO user_profiles (user_id) VALUES ($1)', [userId]);
 
         // Create JWT token
         const token = jwt.sign(
@@ -215,18 +222,27 @@ app.post('/api/login', async (req, res) => {
 // USER ENDPOINTS
 // ============================================
 
-// Get User Profile
+// Get User Profile (Extended)
 app.get('/api/user/profile', authenticateToken, async (req, res) => {
     try {
-        const user = await db.getOne(
-            'SELECT id, email, role, plan_id, credits, printer_model, default_offset, account_status FROM users WHERE id = $1',
-            [req.user.id]
-        );
+        // Fetch User and Profile Data
+        const user = await db.getOne(`
+            SELECT u.id, u.email, u.role, u.plan_id, u.credits, u.printer_model, u.default_offset, u.account_status,
+                   u.customer_number, u.public_id, u.is_verified,
+                   p.salutation, p.first_name, p.last_name, p.company_name, p.vat_id, p.phone, p.mobile
+            FROM users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            WHERE u.id = $1
+        `, [req.user.id]);
         
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        // Fetch Addresses
+        const addresses = await db.getAll('SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC, id ASC', [req.user.id]);
+        
+        user.addresses = addresses;
         res.json(user);
     } catch (err) {
         console.error('Profile error:', err);
@@ -235,34 +251,85 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
 });
 
 // Update User Profile
+// Update User Profile & Master Data
 app.put('/api/user/profile', authenticateToken, async (req, res) => {
-    const { printer_model, default_offset } = req.body;
+    const { 
+        printer_model, default_offset, // User settings
+        salutation, first_name, last_name, company_name, vat_id, phone, mobile // CRM data
+    } = req.body;
 
     try {
-        const updates = [];
-        const params = [];
-        let paramCount = 1;
-
-        if (printer_model !== undefined) {
-            updates.push(`printer_model = $${paramCount++}`);
-            params.push(printer_model);
-        }
-        if (default_offset !== undefined) {
-            updates.push(`default_offset = $${paramCount++}`);
-            params.push(default_offset);
+        // 1. Update User Settings
+        if (printer_model !== undefined || default_offset !== undefined) {
+            await db.run(
+                'UPDATE users SET printer_model = COALESCE($1, printer_model), default_offset = COALESCE($2, default_offset) WHERE id = $3',
+                [printer_model, default_offset, req.user.id]
+            );
         }
 
-        if (updates.length === 0) {
-            return res.status(400).json({ error: 'No fields to update' });
+        // 2. Update/Upsert CRM Profile
+        const profile = await db.getOne('SELECT id FROM user_profiles WHERE user_id = $1', [req.user.id]);
+        
+        if (profile) {
+            await db.run(`
+                UPDATE user_profiles SET
+                    salutation = COALESCE($1, salutation),
+                    first_name = COALESCE($2, first_name),
+                    last_name = COALESCE($3, last_name),
+                    company_name = COALESCE($4, company_name),
+                    vat_id = COALESCE($5, vat_id),
+                    phone = COALESCE($6, phone),
+                    mobile = COALESCE($7, mobile),
+                    updated_at = NOW()
+                WHERE user_id = $8
+            `, [salutation, first_name, last_name, company_name, vat_id, phone, mobile, req.user.id]);
+        } else {
+            await db.run(`
+                INSERT INTO user_profiles (user_id, salutation, first_name, last_name, company_name, vat_id, phone, mobile)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `, [req.user.id, salutation, first_name, last_name, company_name, vat_id, phone, mobile]);
         }
 
-        params.push(req.user.id);
-        const query = `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramCount}`;
-
-        await db.run(query, params);
-        res.json({ message: 'Profile updated successfully' });
+        res.json({ success: true, message: 'Profile updated' });
     } catch (err) {
         console.error('Update profile error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Manage Addresses
+app.post('/api/user/addresses', authenticateToken, async (req, res) => {
+    const { id, type, street, house_number, address_addition, zip_code, city, country, is_default } = req.body;
+    
+    try {
+        if (id) {
+            // Update
+            await db.run(`
+                UPDATE addresses SET
+                    type = $1, street = $2, house_number = $3, address_addition = $4,
+                    zip_code = $5, city = $6, country = $7, is_default = $8, updated_at = NOW()
+                WHERE id = $9 AND user_id = $10
+            `, [type, street, house_number, address_addition, zip_code, city, country, is_default || false, id, req.user.id]);
+        } else {
+            // Create
+            await db.run(`
+                INSERT INTO addresses (user_id, type, street, house_number, address_addition, zip_code, city, country, is_default)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `, [req.user.id, type, street, house_number, address_addition, zip_code, city, country, is_default || false]);
+        }
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Address error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.delete('/api/user/addresses/:id', authenticateToken, async (req, res) => {
+    try {
+        await db.run('DELETE FROM addresses WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Delete address error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -668,6 +735,81 @@ app.get('/api/admin/migrate-templates', authenticateAdmin, async (req, res) => {
         await db.run(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS template_height INTEGER`);
         
         res.json({ success: true, message: 'Migration completed' });
+    } catch (err) {
+        console.error('Migration error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// TEMPORARY: Run CRM migration
+app.get('/api/admin/migrate-crm', authenticateAdmin, async (req, res) => {
+    try {
+        // 1. Enable pgcrypto (might fail if not superuser, but usually allowed in hosted dbs)
+        try { await db.run('CREATE EXTENSION IF NOT EXISTS "pgcrypto"'); } catch (e) { console.log('Extension warning:', e.message); }
+
+        // 2. Extend Users Table
+        await db.run('ALTER TABLE users ADD COLUMN IF NOT EXISTS public_id UUID DEFAULT gen_random_uuid()');
+        await db.run('ALTER TABLE users ADD COLUMN IF NOT EXISTS customer_number VARCHAR(20) UNIQUE');
+        await db.run('ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false');
+        await db.run('ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(100)');
+
+        // 3. Create Sequence
+        await db.run('CREATE SEQUENCE IF NOT EXISTS customer_number_seq START 1000');
+
+        // 4. User Profiles Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+                salutation VARCHAR(20),
+                first_name VARCHAR(100),
+                last_name VARCHAR(100),
+                company_name VARCHAR(150),
+                vat_id VARCHAR(50),
+                phone VARCHAR(50),
+                mobile VARCHAR(50),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 5. Addresses Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS addresses (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(20) NOT NULL,
+                street VARCHAR(150),
+                house_number VARCHAR(20),
+                address_addition VARCHAR(100),
+                zip_code VARCHAR(20),
+                city VARCHAR(100),
+                country VARCHAR(100) DEFAULT 'Deutschland',
+                is_default BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // 6. Indices (Ignore errors if exist)
+        try { await db.run('CREATE INDEX IF NOT EXISTS idx_users_public_id ON users(public_id)'); } catch(e){}
+        try { await db.run('CREATE INDEX IF NOT EXISTS idx_users_customer_number ON users(customer_number)'); } catch(e){}
+
+        // 7. Migrate Existing Users
+        const users = await db.getAll('SELECT id FROM users WHERE customer_number IS NULL');
+        for (const user of users) {
+            // Generate KD Number
+            const seq = await db.getOne("SELECT nextval('customer_number_seq') as num");
+            const kdNr = `KD-${String(seq.num).padStart(6, '0')}`;
+            
+            // Create Profile
+            await db.run('INSERT INTO user_profiles (user_id) VALUES ($1) ON CONFLICT (user_id) DO NOTHING', [user.id]);
+            
+            // Update User
+            await db.run('UPDATE users SET customer_number = $1 WHERE id = $2', [kdNr, user.id]);
+        }
+
+        res.json({ success: true, message: 'CRM Migration completed' });
     } catch (err) {
         console.error('Migration error:', err);
         res.status(500).json({ error: err.message });

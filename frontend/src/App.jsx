@@ -4,6 +4,7 @@ import CanvasEditor from './CanvasEditor';
 import LandingPage from './LandingPage';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
+import UserProfile from './pages/UserProfile';
 import AdminDashboard from './AdminDashboard';
 import PrintSuccess from './pages/PrintSuccess';
 import PrintHistory from './pages/PrintHistory';
@@ -39,7 +40,7 @@ const Navigation = () => {
 
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-600">
                 <div className="text-gray-300">
-                  <span className="font-semibold">{user.email}</span>
+                  <Link to="/profile" className="font-semibold hover:text-white transition-colors">{user.email}</Link>
                   {user.subscription && (
                     <span className="ml-2 text-xs bg-indigo-600 px-2 py-1 rounded">
                       {user.subscription.plan}
@@ -80,6 +81,7 @@ function App() {
               <Route path="/editor" element={<CanvasEditor />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/profile" element={<UserProfile />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/print/success" element={<PrintSuccess />} />
               <Route path="/dashboard/history" element={<PrintHistory />} />
