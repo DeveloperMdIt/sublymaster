@@ -447,6 +447,19 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
 });
 
 // ============================================
+// TEMPLATES ENDPOINT
+// ============================================
+
+app.get('/api/templates', (req, res) => {
+    const templates = [
+        { id: 'mug', name: 'Tasse (Standard)', width: 210, height: 90 },
+        { id: 'bottle', name: 'Flasche', width: 180, height: 120 },
+        { id: 'shirt', name: 'T-Shirt', width: 250, height: 300 }
+    ];
+    res.json(templates);
+});
+
+// ============================================
 // PRINT HISTORY ENDPOINT
 // ============================================
 
