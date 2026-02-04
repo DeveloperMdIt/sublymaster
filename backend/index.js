@@ -753,7 +753,11 @@ app.get('/api/admin/fix-templates-schema', authenticateAdmin, async (req, res) =
         // Create indexes again
         await db.run('CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(created_by)');
 
-        res.json({ success: true, message: 'Templates schema fixed (created_by is now UUID)' });
+        // CLEANUP: Delete standard templates from database (they are now hardcoded in frontend)
+        // This ensures "My Profiles" is empty as requested.
+        await db.run('DELETE FROM templates WHERE is_standard = true OR created_by IS NULL');
+
+        res.json({ success: true, message: 'Templates schema fixed and standard templates removed from DB' });
     } catch (err) {
         console.error('Fix templates schema error:', err);
         res.status(500).json({ error: err.message });
