@@ -11,6 +11,14 @@ export default function UserProfile() {
     const [notification, setNotification] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
 
+    const countries = [
+        "Deutschland", "Österreich", "Schweiz", "Frankreich", "Italien", "Spanien", "Niederlande", "Belgien", "Polen", "Tschechien", "Dänemark", "Luxemburg", "Vereinigtes Königreich", "USA", "Kanada", "Türkei", "Griechenland", "Portugal", "Schweden", "Norwegen", "Finnland"
+    ];
+
+    const legalForms = [
+        "Einzelunternehmer", "GmbH", "UG (haftungsbeschränkt)", "GbR", "OHG", "KG", "GmbH & Co. KG", "AG", "e.K.", "PartG", "Privat", "Sonstige"
+    ];
+
     const showNotify = (message, type = 'success') => {
         setNotification({ message, type });
         setTimeout(() => setNotification(null), 3000);
@@ -103,82 +111,85 @@ export default function UserProfile() {
     if (loading) return <div className="p-8 text-center text-gray-500">Lade Profil...</div>;
 
     return (
-        <div className="bg-gray-50 min-h-screen pb-12">
+        <div className="bg-gray-50 min-h-screen pb-20">
             {/* Notification Toast */}
             {notification && (
-                <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg text-white shadow-xl z-50 animate-fade-in ${notification.type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg text-white shadow-2xl z-50 animate-fade-in ${notification.type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`}>
                     {notification.message}
                 </div>
             )}
 
             {/* Header Area */}
-            <div className="bg-white shadow">
-                <div className="container mx-auto px-6 py-8">
-                    <button onClick={handleBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-4 transition-colors">
-                        <ArrowLeft size={18} className="mr-2" />
+            <div className="bg-white border-b border-gray-200">
+                <div className="container mx-auto px-6 py-10 max-w-6xl">
+                    <button onClick={handleBack} className="flex items-center text-gray-400 hover:text-indigo-600 mb-6 transition-all group font-medium">
+                        <ArrowLeft size={20} className="mr-2 transform group-hover:-translate-x-1 transition-transform" />
                         {user?.role === 'admin' || user?.role === 'ADMIN' ? 'Zurück zum Admin-Dashboard' : 'Zurück zum Editor'}
                     </button>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Mein Profil</h1>
-                            <p className="text-gray-500 mt-1 flex items-center gap-2">
-                                <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-sm font-medium">
+                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Mein Profil</h1>
+                            <p className="text-gray-500 mt-2 flex items-center gap-3">
+                                <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
                                     KD-NR: {profile.customer_number || 'Neu'}
                                 </span>
-                                <span className="text-sm text-gray-400">|</span>
-                                <span className="text-sm">{profile.email}</span>
+                                <span className="text-gray-300">|</span>
+                                <span className="text-base font-medium">{profile.email}</span>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 py-8 max-w-6xl">
+            <div className="container mx-auto px-6 py-10 max-w-6xl">
 
                 {/* STATUS BAR (Plan & Credits) */}
-                <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-xl p-6 text-white shadow-lg flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-white/20 rounded-lg">
+                <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-indigo-600">
+                        <div className="flex items-center gap-5">
+                            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-xl">
                                 <Crown size={32} />
                             </div>
                             <div>
-                                <p className="text-indigo-200 text-sm font-medium">Aktueller Plan</p>
-                                <h3 className="text-2xl font-bold">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
+                                <p className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1">Abonnement</p>
+                                <h3 className="text-2xl font-black text-gray-900">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
                             </div>
                         </div>
-                        <button className="bg-white text-indigo-700 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-50 transition-colors">Upgrade</button>
+                        <button className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95">Upgrade</button>
                     </div>
 
-                    <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg">
+                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
+                        <div className="flex items-center gap-5">
+                            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-xl">
                                 <CreditCard size={32} />
                             </div>
                             <div>
-                                <p className="text-gray-500 text-sm font-medium">Guthaben</p>
-                                <h3 className="text-2xl font-bold text-gray-800">{profile.credits || 0} <span className="text-sm font-normal text-gray-400">Credits</span></h3>
+                                <p className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1">Guthaben</p>
+                                <h3 className="text-2xl font-black text-gray-900">{profile.credits || 0} <span className="text-sm font-medium text-gray-400">Credits</span></h3>
                             </div>
                         </div>
-                        <button className="text-indigo-600 font-medium hover:text-indigo-800 text-sm">Transaktionen ansehen</button>
+                        <button className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors text-sm">Transaktionen</button>
                     </div>
                 </div>
 
                 <form onSubmit={handleSaveProfile}>
-                    <div className="flex flex-col md:flex-row gap-8 items-start">
+                    <div className="flex flex-col md:flex-row gap-10 items-start">
 
                         {/* LEFT COLUMN: Personal Data & Address (2/3) */}
-                        <div className="w-full md:w-2/3 space-y-8">
-                            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-                                <div className="px-8 py-6 border-b bg-gray-50/50 flex items-center gap-3">
-                                    <User className="text-indigo-600" size={24} />
-                                    <h2 className="text-xl font-bold text-gray-800">Persönliche Daten & Anschrift</h2>
+                        <div className="w-full md:w-2/3 space-y-10">
+                            <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                                <div className="px-8 py-6 border-b border-gray-50 bg-gray-50/30 flex items-center gap-4">
+                                    <div className="p-2 bg-indigo-600 rounded-lg text-white">
+                                        <User size={20} />
+                                    </div>
+                                    <h2 className="text-xl font-extrabold text-gray-900">Persönliche Daten & Anschrift</h2>
                                 </div>
-                                <div className="p-8 space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                                        <div className="md:col-span-3">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Anrede</label>
-                                            <select className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
+                                <div className="p-8 space-y-8">
+                                    {/* ROW 1: Anrede (Soll 10 Zeichen breit sein) */}
+                                    <div className="flex flex-col">
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Anrede</label>
+                                        <div className="w-[140px]">
+                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium"
                                                 value={profile.salutation || ''} onChange={e => setProfile({ ...profile, salutation: e.target.value })}>
                                                 <option value="">Wählen</option>
                                                 <option value="Herr">Herr</option>
@@ -186,67 +197,87 @@ export default function UserProfile() {
                                                 <option value="Divers">Divers</option>
                                             </select>
                                         </div>
-                                        <div className="md:col-span-4">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Vorname</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
-                                                value={profile.first_name || ''} onChange={e => setProfile({ ...profile, first_name: e.target.value })} />
-                                        </div>
-                                        <div className="md:col-span-5">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Nachname</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
-                                                value={profile.last_name || ''} onChange={e => setProfile({ ...profile, last_name: e.target.value })} />
-                                        </div>
+                                    </div>
 
-                                        <div className="md:col-span-12 border-t border-gray-100 my-2"></div>
+                                    {/* ROW 2: Vorname & Name */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Vorname</label>
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                                value={profile.first_name || ''} onChange={e => setProfile({ ...profile, first_name: e.target.value })}
+                                                placeholder="Vorname" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Nachname</label>
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                                value={profile.last_name || ''} onChange={e => setProfile({ ...profile, last_name: e.target.value })}
+                                                placeholder="Nachname" />
+                                        </div>
+                                    </div>
 
+                                    {/* ROW 3: Straße & Hausnummer (Hausnr max 10 chars) */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                                         <div className="md:col-span-9">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Straße</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
-                                                value={profile.street || ''} onChange={e => setProfile({ ...profile, street: e.target.value })}
-                                                placeholder="Hauptstraße" />
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Straße</label>
+                                            <div className="relative">
+                                                <MapPin className="absolute left-4 top-3.5 text-gray-300" size={18} />
+                                                <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                                    value={profile.street || ''} onChange={e => setProfile({ ...profile, street: e.target.value })}
+                                                    placeholder="Hauptstraße" />
+                                            </div>
                                         </div>
                                         <div className="md:col-span-3">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Hausnummer</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Hausnummer</label>
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
                                                 value={profile.house_number || ''} onChange={e => setProfile({ ...profile, house_number: e.target.value })}
                                                 placeholder="1A" />
                                         </div>
+                                    </div>
 
-                                        <div className="md:col-span-3">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
+                                    {/* ROW 4: PLZ & Ort (PLZ max 10 chars) */}
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                        <div className="md:col-span-4">
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">PLZ</label>
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
                                                 value={profile.zip || ''} onChange={e => setProfile({ ...profile, zip: e.target.value })}
                                                 placeholder="12345" />
                                         </div>
-                                        <div className="md:col-span-5">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Ort</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
+                                        <div className="md:col-span-8">
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Ort</label>
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
                                                 value={profile.city || ''} onChange={e => setProfile({ ...profile, city: e.target.value })}
-                                                placeholder="Musterstadt" />
+                                                placeholder="Stadt" />
                                         </div>
-                                        <div className="md:col-span-4">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Land</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
-                                                value={profile.country || 'Deutschland'} onChange={e => setProfile({ ...profile, country: e.target.value })} />
-                                        </div>
+                                    </div>
 
-                                        <div className="md:col-span-12 border-t border-gray-100 my-2"></div>
+                                    {/* ROW 5: Land (Deutschland zuerst) */}
+                                    <div className="flex flex-col">
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Land</label>
+                                        <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            value={profile.country || 'Deutschland'} onChange={e => setProfile({ ...profile, country: e.target.value })}>
+                                            {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
 
-                                        <div className="md:col-span-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                                                <input type="text" className="w-full border-gray-300 rounded-lg pl-10 focus:ring-indigo-500 focus:border-indigo-500 py-2 border"
-                                                    value={profile.phone || ''} onChange={e => setProfile({ ...profile, phone: e.target.value })} />
-                                            </div>
+                                    {/* ROW 6: Telefon */}
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Telefon</label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-4 top-3.5 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                                value={profile.phone || ''} onChange={e => setProfile({ ...profile, phone: e.target.value })}
+                                                placeholder="+49 (0) ..." />
                                         </div>
-                                        <div className="md:col-span-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Mobil</label>
-                                            <div className="relative">
-                                                <Phone className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                                                <input type="text" className="w-full border-gray-300 rounded-lg pl-10 focus:ring-indigo-500 focus:border-indigo-500 py-2 border"
-                                                    value={profile.mobile || ''} onChange={e => setProfile({ ...profile, mobile: e.target.value })} />
-                                            </div>
+                                    </div>
+
+                                    {/* ROW 7: Mobil */}
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Mobil</label>
+                                        <div className="relative">
+                                            <Phone className="absolute left-4 top-3.5 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                                value={profile.mobile || ''} onChange={e => setProfile({ ...profile, mobile: e.target.value })}
+                                                placeholder="+49 (1) ..." />
                                         </div>
                                     </div>
                                 </div>
@@ -254,35 +285,49 @@ export default function UserProfile() {
                         </div>
 
                         {/* RIGHT COLUMN: Company Data (1/3) */}
-                        <div className="w-full md:w-1/3 space-y-8">
-                            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-                                <div className="px-8 py-6 border-b bg-gray-50/50 flex items-center gap-3">
-                                    <Briefcase className="text-indigo-600" size={24} />
-                                    <h2 className="text-xl font-bold text-gray-800">Firmendaten</h2>
+                        <div className="w-full md:w-1/3 space-y-10">
+                            <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                                <div className="px-8 py-6 border-b border-gray-50 bg-gray-50/30 flex items-center gap-4">
+                                    <div className="p-2 bg-indigo-600 rounded-lg text-white">
+                                        <Briefcase size={20} />
+                                    </div>
+                                    <h2 className="text-xl font-extrabold text-gray-900">Firmendaten</h2>
                                 </div>
-                                <div className="p-8 space-y-6">
+                                <div className="p-8 space-y-8">
+                                    {/* ROW 1: Firmenname */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Firmenname <span className="text-gray-400 font-normal">(Optional)</span></label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Firmenname <span className="text-gray-300 font-normal normal-case italic">(Optional)</span></label>
                                         <div className="relative">
-                                            <Building className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-lg pl-10 focus:ring-indigo-500 focus:border-indigo-500 py-2 border"
+                                            <Building className="absolute left-4 top-3.5 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
                                                 value={profile.company_name || ''} onChange={e => setProfile({ ...profile, company_name: e.target.value })}
                                                 placeholder="Musterfirma GmbH" />
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">USt-IdNr.</label>
-                                        <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 py-2 border px-3"
-                                            value={profile.vat_id || ''} onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
-                                            placeholder="DE123456789" />
+
+                                    {/* ROW 2: Rechtsform & USt-IdNr side-by-side */}
+                                    <div className="grid grid-cols-1 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Rechtsform</label>
+                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                                value={profile.legal_form || ''} onChange={e => setProfile({ ...profile, legal_form: e.target.value })}>
+                                                <option value="">Wählen</option>
+                                                {legalForms.map(f => <option key={f} value={f}>{f}</option>)}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">USt-IdNr.</label>
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                                value={profile.vat_id || ''} onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
+                                                placeholder="DE123456789" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Save Button in the right column or spanning bottom? User screenshot had it bottom right. */}
-                            {/* I will place it here for visual balance in the company card or below it. */}
-                            <button type="submit" disabled={isSaving} className="w-full bg-indigo-600 text-white px-8 py-4 rounded-xl hover:bg-indigo-700 flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 transition-all transform active:scale-95 font-bold text-lg">
-                                <Save size={24} /> {isSaving ? 'Speichere...' : 'Änderungen speichern'}
+                            <button type="submit" disabled={isSaving} className="w-full bg-indigo-600 text-white px-8 py-5 rounded-2xl hover:bg-indigo-700 flex items-center justify-center gap-3 shadow-2xl shadow-indigo-100 transition-all transform active:scale-95 font-black text-xl group">
+                                <Save size={24} className="group-hover:rotate-12 transition-transform" />
+                                {isSaving ? 'Speichere...' : 'Änderungen speichern'}
                             </button>
                         </div>
 

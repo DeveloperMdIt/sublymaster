@@ -258,7 +258,7 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
 app.put('/api/user/profile', authenticateToken, async (req, res) => {
     const { 
         printer_model, default_offset, // User settings
-        salutation, first_name, last_name, company_name, vat_id, phone, mobile, // CRM data
+        salutation, first_name, last_name, company_name, vat_id, phone, mobile, legal_form, // CRM data
         street, house_number, zip, city, country // Address data
     } = req.body;
 
@@ -284,14 +284,15 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
                     vat_id = COALESCE($5, vat_id),
                     phone = COALESCE($6, phone),
                     mobile = COALESCE($7, mobile),
+                    legal_form = COALESCE($8, legal_form),
                     updated_at = NOW()
-                WHERE user_id = $8
-            `, [salutation, first_name, last_name, company_name, vat_id, phone, mobile, req.user.id]);
+                WHERE user_id = $9
+            `, [salutation, first_name, last_name, company_name, vat_id, phone, mobile, legal_form, req.user.id]);
         } else {
             await db.run(`
-                INSERT INTO user_profiles (user_id, salutation, first_name, last_name, company_name, vat_id, phone, mobile)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            `, [req.user.id, salutation, first_name, last_name, company_name, vat_id, phone, mobile]);
+                INSERT INTO user_profiles (user_id, salutation, first_name, last_name, company_name, vat_id, phone, mobile, legal_form)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `, [req.user.id, salutation, first_name, last_name, company_name, vat_id, phone, mobile, legal_form]);
         }
 
         // 3. Update/Upsert Billing Address (if provided)
@@ -752,6 +753,11 @@ app.get('/api/admin/fix-templates-schema', authenticateAdmin, async (req, res) =
         
         // Create indexes again
         await db.run('CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(created_by)');
+
+        // Migration: Add legal_form to user_profiles if missing
+        try {
+            await db.run('ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS legal_form VARCHAR(50)');
+        } catch (e) { console.log('legal_form column might already exist'); }
 
         // CLEANUP: Delete standard templates from database (they are now hardcoded in frontend)
         // This ensures "My Profiles" is empty as requested.
