@@ -165,10 +165,10 @@ export default function UserProfile() {
                 </div>
 
                 <form onSubmit={handleSaveProfile}>
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                    <div className="flex flex-col md:flex-row gap-8 items-start">
 
-                        {/* LEFT COLUMN: Personal Data & Address (8/12) */}
-                        <div className="md:col-span-8 space-y-8">
+                        {/* LEFT COLUMN: Personal Data & Address (2/3) */}
+                        <div className="w-full md:w-2/3 space-y-8">
                             <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                                 <div className="px-8 py-6 border-b bg-gray-50/50 flex items-center gap-3">
                                     <User className="text-indigo-600" size={24} />
@@ -253,8 +253,8 @@ export default function UserProfile() {
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN: Company Data (4/12) */}
-                        <div className="md:col-span-4 space-y-8">
+                        {/* RIGHT COLUMN: Company Data (1/3) */}
+                        <div className="w-full md:w-1/3 space-y-8">
                             <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
                                 <div className="px-8 py-6 border-b bg-gray-50/50 flex items-center gap-3">
                                     <Briefcase className="text-indigo-600" size={24} />
