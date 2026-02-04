@@ -446,50 +446,6 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     }
 });
 
-// Get admin settings
-app.get('/api/admin/settings', authenticateAdmin, async (req, res) => {
-    try {
-        const settings = await db.getAll('SELECT * FROM settings');
-        const settingsObj = {};
-        settings.forEach(s => {
-            settingsObj[s.key] = s.value;
-        });
-        res.json(settingsObj);
-    } catch (err) {
-        console.error('Get settings error:', err);
-        // Return empty settings if table doesn't exist yet
-        res.json({});
-    }
-});
-
-// Update admin settings
-app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
-    const { key, value } = req.body;
-    try {
-        await db.run(
-            'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
-            [key, value]
-        );
-        res.json({ message: 'Settings updated' });
-    } catch (err) {
-        console.error('Update settings error:', err);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ============================================
-// TEMPLATES ENDPOINT
-// ============================================
-
-app.get('/api/templates', (req, res) => {
-    const templates = [
-        { id: 'mug', name: 'Tasse (Standard)', width: 210, height: 90 },
-        { id: 'bottle', name: 'Flasche', width: 180, height: 120 },
-        { id: 'shirt', name: 'T-Shirt', width: 250, height: 300 }
-    ];
-    res.json(templates);
-});
-
 // ============================================
 // PRINT HISTORY ENDPOINT
 // ============================================
@@ -504,84 +460,6 @@ app.get('/api/history', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error('Get history error:', err);
         res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// ============================================
-// DEPLOYMENT MANAGEMENT ENDPOINTS
-// ============================================
-
-// Trigger deployment
-app.post('/api/admin/deploy', authenticateAdmin, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        
-        // Record deployment start
-        const result = await db.query(
-            'INSERT INTO deployment_history (triggered_by, status, branch) VALUES ($1, $2, $3) RETURNING id',
-            [userId, 'running', 'main']
-        );
-        
-        // Trigger GitHub Actions workflow
-        const githubToken = process.env.GITHUB_TOKEN;
-        if (!githubToken) {
-            return res.json({ 
-                success: true, 
-                message: 'Deployment triggered locally (GitHub token not configured)',
-                deploymentId: result.rows[0].id
-            });
-        }
-        
-        const response = await fetch(
-            'https://api.github.com/repos/DeveloperMdIt/sublymaster/actions/workflows/deploy.yml/dispatches',
-            {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${githubToken}`,
-                    'Accept': 'application/vnd.github+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ref: 'main' })
-            }
-        );
-        
-        if (!response.ok) {
-            throw new Error(`GitHub API error: ${response.statusText}`);
-        }
-        
-        res.json({ 
-            success: true, 
-            message: 'Deployment triggered!',
-            deploymentId: result.rows[0].id
-        });
-    } catch (err) {
-        console.error('Deploy error:', err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get deployment history
-app.get('/api/admin/deployments', authenticateAdmin, async (req, res) => {
-    try {
-        const deployments = await db.getAll(`
-            SELECT 
-                d.id, 
-                d.status, 
-                d.branch,
-                d.commit_hash,
-                d.started_at, 
-                d.completed_at,
-                d.error_message,
-                u.email as triggered_by_email
-            FROM deployment_history d
-            LEFT JOIN users u ON d.triggered_by = u.id
-            ORDER BY d.started_at DESC
-            LIMIT 50
-        `);
-        res.json(deployments || []);
-    } catch (err) {
-        console.error('Get deployments error:', err);
-        res.json([]);
     }
 });
 
