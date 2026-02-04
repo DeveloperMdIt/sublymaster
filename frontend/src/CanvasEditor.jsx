@@ -35,19 +35,40 @@ const CanvasEditor = () => {
         setNotification({ message, type });
     };
 
-    // Template dimensions in pixels (approx 300 DPI or scaled for screen)
-    // Mug: 200x95mm -> approx 2362x1122 px at 300 DPI. 
-    // For screen editor we use a scale factor. Let's say 1mm = 4px for viewing.
+    // Template dimensions in pixels (approx 300 DPI or scaled for screen, 1mm = 4px)
     const templates = {
-        mug: { width: 800, height: 380, label: 'Tasse (200x95mm)' },
-        a4: { width: 840, height: 1188, label: 'A4 Papier (210x297mm)' },
-        a3: { width: 1188, height: 1680, label: 'A3 Papier (297x420mm)' },
-        mousepad: { width: 920, height: 760, label: 'Mousepad (230x190mm)' },
-        coaster_round: { width: 380, height: 380, label: 'Untersetzer Rund (95mm)' },
-        coaster_square: { width: 380, height: 380, label: 'Untersetzer Eckig (95x95mm)' },
-        iphone_max: { width: 320, height: 640, label: 'Handyhülle Max (80x160mm)' },
-        pillow: { width: 1600, height: 1600, label: 'Kissen (40x40cm)' }
+        // Klassiker
+        a4: { width: 840, height: 1188, label: 'Standardformat A4 (21x29,7cm)' },
+        a3: { width: 1188, height: 1680, label: 'Großformat A3 (29,7x42cm)' },
+
+        // Tassen
+        mug: { width: 800, height: 380, label: 'Tasse Standard (200x95mm)' },
+        mug_wrap: { width: 800, height: 360, label: 'Tassen-Wrap (200x90mm)' },
+        mug_xl: { width: 880, height: 360, label: 'XL-Tassenformat (220x90mm)' },
+        tumbler: { width: 1000, height: 400, label: 'Thermobecher (250x100mm)' },
+
+        // Textil
+        pocket: { width: 400, height: 400, label: 'Brustlogo (10x10cm)' },
+        shirt_front: { width: 800, height: 1200, label: 'Frontprint Standard (20x30cm)' },
+        shirt_back: { width: 1200, height: 1600, label: 'Rücken / Groß (30x40cm)' },
+
+        // Deko
+        photo_small: { width: 600, height: 800, label: 'Fotoformat klein (15x20cm)' },
+        photo_medium: { width: 800, height: 1200, label: 'Fotoformat mittel (20x30cm)' },
+        photo_large: { width: 1200, height: 1600, label: 'Wandbild groß (30x40cm)' },
+
+        // Büro
+        mousepad: { width: 920, height: 760, label: 'Mousepad (23x19cm)' },
+        deskmat: { width: 1600, height: 1200, label: 'Desk-Mat (40x30cm)' }
     };
+
+    const TEMPLATE_CATEGORIES = [
+        { id: 'classic', label: '🖼️ Klassische Druckformate', items: ['a4', 'a3'] },
+        { id: 'mugs', label: '☕ Tassen & Trinkgefäße', items: ['mug', 'mug_wrap', 'mug_xl', 'tumbler'] },
+        { id: 'textile', label: '👕 Textilien', items: ['pocket', 'shirt_front', 'shirt_back'] },
+        { id: 'deco', label: '🧩 Deko & Foto', items: ['photo_small', 'photo_medium', 'photo_large'] },
+        { id: 'office', label: '🖱️ Büro & Werbeartikel', items: ['mousepad', 'deskmat'] }
+    ];
 
     const [customTemplates, setCustomTemplates] = useState([]);
 
@@ -877,12 +898,16 @@ const CanvasEditor = () => {
                         onChange={handleTemplateChange}
                         className="p-2 border rounded-md shadow-sm bg-white"
                     >
-                        <optgroup label="Standard">
-                            <option value="mug">Tasse (200x95mm)</option>
-                            <option value="a4">A4 Papier</option>
-                        </optgroup>
+                        {TEMPLATE_CATEGORIES.map(cat => (
+                            <optgroup key={cat.id} label={cat.label}>
+                                {cat.items.map(key => (
+                                    <option key={key} value={key}>{templates[key].label}</option>
+                                ))}
+                            </optgroup>
+                        ))}
+
                         {customTemplates.length > 0 && (
-                            <optgroup label="Meine Profile">
+                            <optgroup label="👤 Meine Profile">
                                 {customTemplates.map(t => (
                                     <option key={t.id} value={t.id}>{t.label}</option>
                                 ))}
