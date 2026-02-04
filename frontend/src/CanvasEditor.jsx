@@ -95,14 +95,18 @@ const CanvasEditor = () => {
                 .then(res => res.json())
                 .then(data => {
                     if (Array.isArray(data)) {
-                        const normalized = data.map(t => ({
-                            id: t.id,
-                            key: `custom_${t.id}`,
-                            name: t.name,
-                            width: t.width,
-                            height: t.height,
-                            label: `${t.name} (${t.width / 4}x${t.height / 4}mm)`
-                        }));
+                        // Only show non-standard templates in "My Profiles"
+                        // (Standard templates are handled by predefined list)
+                        const normalized = data
+                            .filter(t => !t.is_standard)
+                            .map(t => ({
+                                id: t.id,
+                                key: `custom_${t.id}`,
+                                name: t.name,
+                                width: t.width,
+                                height: t.height,
+                                label: `${t.name} (${t.width / 4}x${t.height / 4}mm)`
+                            }));
                         setCustomTemplates(normalized);
                     }
                 })

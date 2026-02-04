@@ -258,7 +258,8 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
 app.put('/api/user/profile', authenticateToken, async (req, res) => {
     const { 
         printer_model, default_offset, // User settings
-        salutation, first_name, last_name, company_name, vat_id, phone, mobile // CRM data
+        salutation, first_name, last_name, company_name, vat_id, phone, mobile, // CRM data
+        street, house_number, zip, city, country // Address data
     } = req.body;
 
     try {
@@ -291,6 +292,30 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
                 INSERT INTO user_profiles (user_id, salutation, first_name, last_name, company_name, vat_id, phone, mobile)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             `, [req.user.id, salutation, first_name, last_name, company_name, vat_id, phone, mobile]);
+        }
+
+        // 3. Update/Upsert Billing Address (if provided)
+        if (street || zip || city || country) {
+            // Check for existing billing address
+            const billingAddr = await db.getOne('SELECT id FROM addresses WHERE user_id = $1 AND type = $2', [req.user.id, 'billing']);
+            
+            if (billingAddr) {
+                await db.run(`
+                    UPDATE addresses SET
+                        street = COALESCE($1, street),
+                        house_number = COALESCE($2, house_number),
+                        zip = COALESCE($3, zip),
+                        city = COALESCE($4, city),
+                        country = COALESCE($5, country),
+                        updated_at = NOW()
+                    WHERE id = $6
+                `, [street, house_number, zip, city, country, billingAddr.id]);
+            } else {
+                await db.run(`
+                    INSERT INTO addresses (user_id, type, street, house_number, zip, city, country, is_default)
+                    VALUES ($1, 'billing', $2, $3, $4, $5, $6, true)
+                `, [req.user.id, street, house_number, zip, city, country]);
+            }
         }
 
         res.json({ success: true, message: 'Profile updated' });
@@ -715,48 +740,22 @@ app.delete('/api/admin/templates/:id', authenticateAdmin, async (req, res) => {
     }
 });
 
-// TEMPORARY: Run templates migration
-app.get('/api/admin/migrate-templates', authenticateAdmin, async (req, res) => {
+// FIX: Repair templates table schema (created_by UUID issue)
+app.get('/api/admin/fix-templates-schema', authenticateAdmin, async (req, res) => {
     try {
-        // Create templates table
-        await db.run(`
-            CREATE TABLE IF NOT EXISTS templates (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                width INTEGER NOT NULL,
-                height INTEGER NOT NULL,
-                is_standard BOOLEAN DEFAULT false,
-                created_by INTEGER REFERENCES users(id),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
+        // Drop constraint if exists
+        try { await db.run('ALTER TABLE templates DROP CONSTRAINT IF EXISTS templates_created_by_fkey'); } catch (e) {}
         
-        // Create indexes
-        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_standard ON templates(is_standard)`);
-        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_size ON templates(width, height)`);
-        await db.run(`CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(created_by)`);
+        // Re-create created_by as UUID (dropping data is acceptable as per user input "nothing saved yet")
+        await db.run('ALTER TABLE templates DROP COLUMN IF EXISTS created_by');
+        await db.run('ALTER TABLE templates ADD COLUMN created_by UUID REFERENCES users(id)');
         
-        // Insert initial templates
-        await db.run(`
-            INSERT INTO templates (name, width, height, is_standard) 
-            SELECT * FROM (VALUES
-                ('Tasse (Standard)', 800, 380, true),
-                ('Flasche', 720, 480, true),
-                ('T-Shirt', 1000, 1200, true)
-            ) AS v(name, width, height, is_standard)
-            WHERE NOT EXISTS (
-                SELECT 1 FROM templates WHERE is_standard = true LIMIT 1
-            )
-        `);
-        
-        // Add columns to projects
-        await db.run(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS template_width INTEGER`);
-        await db.run(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS template_height INTEGER`);
-        
-        res.json({ success: true, message: 'Migration completed' });
+        // Create indexes again
+        await db.run('CREATE INDEX IF NOT EXISTS idx_templates_user ON templates(created_by)');
+
+        res.json({ success: true, message: 'Templates schema fixed (created_by is now UUID)' });
     } catch (err) {
-        console.error('Migration error:', err);
+        console.error('Fix templates schema error:', err);
         res.status(500).json({ error: err.message });
     }
 });
