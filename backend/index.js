@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
@@ -44,6 +46,59 @@ const db = new Database(DATABASE_URL);
         // 3. Fix data for existing users
         await db.run("UPDATE users SET role = 'user' WHERE role IS NULL");
         await db.run("UPDATE users SET account_status = 'active' WHERE account_status IS NULL");
+
+        // 4. Email Templates Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS email_templates (
+                id SERIAL PRIMARY KEY,
+                type VARCHAR(50) UNIQUE NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                subject VARCHAR(200) NOT NULL,
+                body TEXT NOT NULL,
+                enabled BOOLEAN DEFAULT true,
+                send_after_days INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 5. Email Queue Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS email_queue (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                template_type VARCHAR(50),
+                scheduled_for TIMESTAMP NOT NULL,
+                sent_at TIMESTAMP,
+                status VARCHAR(20) DEFAULT 'pending',
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 6. Seed Default Templates
+        const templates = [
+            {
+                type: 'registration',
+                name: 'Registrierungsbestätigung',
+                subject: 'Bitte bestätigen Sie Ihre Email-Adresse',
+                body: 'Hallo,\n\nvielen Dank für Ihre Registrierung bei SublyMaster!\n\nBitte bestätigen Sie Ihre Email-Adresse durch Klick auf den folgenden Link:\n{{verificationLink}}\n\nViele Grüße,\nIhr SublyMaster Team'
+            },
+            {
+                type: 'welcome',
+                name: 'Willkommensmail',
+                subject: 'Willkommen bei SublyMaster!',
+                body: 'Hallo,\n\nwillkommen bei SublyMaster! Ihr Konto wurde erfolgreich aktiviert.\n\nViel Spaß beim Designen!\n\nIhr SublyMaster Team'
+            }
+        ];
+
+        for (const t of templates) {
+            await db.run(`
+                INSERT INTO email_templates (type, name, subject, body)
+                VALUES ($1, $2, $3, $4)
+                ON CONFLICT (type) DO NOTHING
+            `, [t.type, t.name, t.subject, t.body]);
+        }
         
         console.log('✅ Database schema is up to date.');
     } catch (err) {
@@ -85,6 +140,87 @@ const authenticateAdmin = (req, res, next) => {
         }
     });
 };
+
+// --- EMAIL HELPERS ---
+const replacePlaceholders = (text, data) => {
+    return text.replace(/\{\{(\w+)\}\}/g, (match, key) => data[key] || match);
+};
+
+const sendEmail = async (to, templateType, data) => {
+    try {
+        const template = await db.getOne('SELECT * FROM email_templates WHERE type = $1 AND enabled = true', [templateType]);
+        if (!template) {
+            console.log(`⚠️ Email template ${templateType} not found or disabled. Skipping.`);
+            return;
+        }
+
+        const subject = replacePlaceholders(template.subject, data);
+        const body = replacePlaceholders(template.body, data);
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT || 587,
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        await transporter.sendMail({
+            from: process.env.SMTP_FROM || 'noreply@sublymaster.de',
+            to,
+            subject,
+            text: body,
+            html: body.replace(/\n/g, '<br>')
+        });
+
+        console.log(`📧 Email sent to ${to}: ${templateType}`);
+    } catch (err) {
+        console.error('❌ Error sending email:', err.message);
+    }
+};
+
+// ============================================
+// ADMIN EMAIL TEMPLATE ENDPOINTS
+// ============================================
+
+app.get('/api/admin/email-templates', authenticateAdmin, async (req, res) => {
+    try {
+        const templates = await db.getAll('SELECT * FROM email_templates ORDER BY type');
+        res.json(templates);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch templates' });
+    }
+});
+
+app.put('/api/admin/email-templates/:type', authenticateAdmin, async (req, res) => {
+    const { subject, body, enabled } = req.body;
+    try {
+        await db.run(
+            'UPDATE email_templates SET subject = $1, body = $2, enabled = $3, updated_at = CURRENT_TIMESTAMP WHERE type = $4',
+            [subject, body, enabled, req.params.type]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to update template' });
+    }
+});
+
+app.post('/api/admin/email-templates/test', authenticateAdmin, async (req, res) => {
+    const { type, testEmail } = req.body;
+    try {
+        await sendEmail(testEmail, type, {
+            name: 'Test Admin',
+            email: testEmail,
+            verificationLink: 'https://sublymaster.de/api/verify-email/TEST-TOKEN',
+            credits: 100
+        });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to send test email' });
+    }
+});
 
 // ============================================
 // ROUTES
@@ -133,10 +269,13 @@ app.post('/api/register', async (req, res) => {
         const seq = await db.getOne("SELECT nextval('customer_number_seq') as num");
         const kdNr = `KD-${String(seq.num).padStart(6, '0')}`;
 
+        // Generate Verification Token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
         // Insert user
         const result = await db.query(
-            'INSERT INTO users (email, password, role, plan_id, credits, customer_number, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-            [email, hashedPassword, 'user', plan_id, initial_credits, kdNr, true] // Default verified true for now until email system is active
+            'INSERT INTO users (email, password, role, plan_id, credits, customer_number, is_verified, verification_token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+            [email, hashedPassword, 'user', plan_id, initial_credits, kdNr, false, verificationToken]
         );
 
         const userId = result.rows[0].id;
@@ -157,6 +296,12 @@ app.post('/api/register', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        // Send Verification Email
+        await sendEmail(email, 'registration', {
+            name: email.split('@')[0],
+            verificationLink: `${process.env.FRONTEND_URL || 'https://sublymaster.de'}/api/verify-email/${verificationToken}`
+        });
+
         // Log activity
         await db.run(
             'INSERT INTO user_activity (user_id, action, ip_address) VALUES ($1, $2, $3)',
@@ -164,7 +309,8 @@ app.post('/api/register', async (req, res) => {
         );
 
         res.status(201).json({
-            message: 'User registered successfully',
+            success: true,
+            message: 'Registrierung erfolgreich. Bitte bestätigen Sie Ihre Email-Adresse.',
             token: token,
             user: {
                 id: userId,
@@ -182,7 +328,28 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Login
+// Verify Email
+app.get('/api/verify-email/:token', async (req, res) => {
+    const { token } = req.params;
+    try {
+        const user = await db.getOne('SELECT id, email FROM users WHERE verification_token = $1', [token]);
+        if (!user) {
+            return res.status(400).send('<h1>Ungültiger oder abgelaufener Token</h1><p><a href="https://sublymaster.de/login">Zum Login</a></p>');
+        }
+
+        await db.run('UPDATE users SET is_verified = true, verification_token = NULL WHERE id = $1', [user.id]);
+        
+        // Send Welcome Email
+        await sendEmail(user.email, 'welcome', {
+            name: user.email.split('@')[0]
+        });
+
+        res.send('<h1>E-Mail erfolgreich verifiziert!</h1><p>Vielen Dank. Sie können sich jetzt einloggen.</p><p><a href="https://sublymaster.de/login">Zum Login</a></p>');
+    } catch (err) {
+        res.status(500).send('<h1>Serverfehler</h1>');
+    }
+});
+
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 

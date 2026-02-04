@@ -6,6 +6,7 @@ import Toast from './components/Toast';
 import AdminLayout from './components/admin/AdminLayout';
 import PrinterAnalytics from './components/admin/PrinterAnalytics';
 import TemplateManagement from './components/admin/TemplateManagement';
+import AdminEmailSettings from './components/admin/AdminEmailSettings';
 
 const AdminDashboard = () => {
     const { user, token, logout } = useAuth();
@@ -38,6 +39,9 @@ const AdminDashboard = () => {
     const [editingPlan, setEditingPlan] = useState(null);
     const [planForm, setPlanForm] = useState({ name: '', price: '', type: 'subscription', credits: 0, is_active: 1 });
     const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+
+    // UI Confirmation States
+    const [confirmDelete, setConfirmDelete] = useState(null);
 
     const showNotify = (message, type = 'info') => {
         setNotification({ message, type });
@@ -127,32 +131,6 @@ const AdminDashboard = () => {
         }
     };
 
-    const [userToDelete, setUserToDelete] = useState(null);
-
-    const handleDeleteUser = (user) => {
-        setUserToDelete(user);
-    };
-
-    const confirmDeleteUser = async () => {
-        if (!userToDelete) return;
-
-        try {
-            const res = await fetchWithAuth(`/api/admin/users/${userToDelete.id}`, {
-                method: 'DELETE'
-            });
-            if (!res) return;
-
-            if (res.ok) {
-                showNotify('Benutzer gelöscht', 'success');
-                setUsers(users.filter(u => u.id !== userToDelete.id));
-                setUserToDelete(null);
-            } else {
-                showNotify('Fehler beim Löschen', 'error');
-            }
-        } catch (err) {
-            showNotify('Netzwerkfehler', 'error');
-        }
-    };
 
     const handleSaveSettings = async () => {
         setIsSaving(true);
@@ -358,16 +336,8 @@ const AdminDashboard = () => {
                                                     </button>
                                                 )}
 
-                                                <button onClick={async () => {
-                                                    if (window.confirm('User wirklich löschen? Dies kann nicht rückgängig gemacht werden!')) {
-                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'DELETE' });
-                                                        if (res && res.ok) {
-                                                            showNotify('User gelöscht');
-                                                            setUsers(users.filter(user => user.id !== u.id));
-                                                        } else {
-                                                            showNotify('Fehler beim Löschen', 'error');
-                                                        }
-                                                    }
+                                                <button onClick={() => {
+                                                    setConfirmDelete(u);
                                                 }} className="text-red-600 hover:text-red-800">
                                                     Löschen
                                                 </button>
@@ -378,6 +348,49 @@ const AdminDashboard = () => {
                             </table>
                             {users.length === 0 && <div className="p-4 text-center text-gray-500">Keine Benutzer gefunden.</div>}
                         </div>
+
+                        {/* Custom Confirm Delete Modal */}
+                        <Modal
+                            isOpen={!!confirmDelete}
+                            onClose={() => setConfirmDelete(null)}
+                            title="Benutzer löschen"
+                            footer={
+                                <div className="flex gap-3 w-full sm:w-auto">
+                                    <button
+                                        onClick={() => setConfirmDelete(null)}
+                                        className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50"
+                                    >
+                                        Abbrechen
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            const userId = confirmDelete.id;
+                                            setConfirmDelete(null);
+                                            const res = await fetchWithAuth(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                                            if (res && res.ok) {
+                                                showNotify('User gelöscht');
+                                                setUsers(users.filter(user => user.id !== userId));
+                                            } else {
+                                                showNotify('Fehler beim Löschen', 'error');
+                                            }
+                                        }}
+                                        className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 shadow-sm"
+                                    >
+                                        Endgültig löschen
+                                    </button>
+                                </div>
+                            }
+                        >
+                            <div className="flex flex-col items-center text-center p-2">
+                                <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mb-4">
+                                    <X size={32} />
+                                </div>
+                                <p className="text-gray-900 font-bold text-lg mb-2">User wirklich löschen?</p>
+                                <p className="text-gray-500 text-sm">
+                                    Möchtest du den Benutzer <span className="text-gray-900 font-semibold">{confirmDelete?.email}</span> wirklich unwiderruflich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
+                                </p>
+                            </div>
+                        </Modal>
                     </div>
                 );
             case 'settings':
@@ -457,6 +470,8 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 );
+            case 'emails':
+                return <AdminEmailSettings token={token} showNotify={showNotify} />;
             case 'plans':
                 return (
                     <div>
@@ -532,29 +547,7 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
-            {userToDelete && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
-                        <div className="flex items-center gap-3 text-red-600 mb-4">
-                            <AlertCircle size={24} />
-                            <h3 className="text-xl font-bold">Benutzer löschen?</h3>
-                        </div>
-                        <p className="text-gray-600 mb-6">
-                            Bist du sicher, dass du den Benutzer <strong>{userToDelete.email}</strong> löschen möchtest?
-                            Alle zugehörigen Daten (Projekte, Historie) werden unwiderruflich entfernt.
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button onClick={() => setUserToDelete(null)} className="px-4 py-2 hover:bg-gray-100 rounded text-gray-700 font-medium">
-                                Abbrechen
-                            </button>
-                            <button onClick={confirmDeleteUser} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium shadow-sm">
-                                Ja, unwiderruflich löschen
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* All modals and overlays are now handled within their specific switch cases or via the Modal component above */}
         </AdminLayout>
     );
 };

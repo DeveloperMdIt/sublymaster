@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, Printer, CreditCard, Settings, LogOut, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, Printer, CreditCard, Settings, LogOut, FileText, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -48,6 +48,12 @@ const AdminLayout = ({ children, activeTab, setActiveTab }) => {
                         label="Vorlagen"
                         active={activeTab === 'templates'}
                         onClick={() => setActiveTab('templates')}
+                    />
+                    <SidebarItem
+                        icon={<Mail size={20} />}
+                        label="Emails"
+                        active={activeTab === 'emails'}
+                        onClick={() => setActiveTab('emails')}
                     />
                     <SidebarItem
                         icon={<Settings size={20} />}

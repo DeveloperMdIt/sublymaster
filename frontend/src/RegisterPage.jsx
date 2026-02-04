@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'; // added useNavigate
-import { Check, X, Eye, EyeOff } from 'lucide-react';
+import { Check, X, Eye, EyeOff, Mail } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import Modal from './components/Modal';
 import API_ENDPOINTS from './config/api';
@@ -34,7 +34,7 @@ const RegisterPage = () => {
     const match = password === confirmPassword && password !== '';
 
     const [showModal, setShowModal] = useState(false);
-
+    const [registrationSuccess, setRegistrationSuccess] = useState(false);
     const [tempUser, setTempUser] = useState(null); // Stores {email, password}
 
     const completeRegistration = async (selectedPlan) => {
@@ -56,10 +56,11 @@ const RegisterPage = () => {
                 throw new Error(data.error || 'Registrierung fehlgeschlagen');
             }
 
-            // Success - Now we login
-            login(data.user, data.token);
-            setShowModal(false);
-            navigate('/editor');
+            // Success - Instead of login, we show success state
+            setRegistrationSuccess(true);
+            setShowModal(true);
+            // login(data.user, data.token); // Disabled for email verification flow
+            // navigate('/editor');
 
         } catch (err) {
             setError(err.message);
@@ -101,53 +102,78 @@ const RegisterPage = () => {
         <>
             <Modal
                 isOpen={showModal}
-                onClose={closeModal}
-                title="Willkommen bei Sublymaster!"
+                onClose={() => !registrationSuccess && setShowModal(false)}
+                title={registrationSuccess ? "Fast geschafft!" : "Willkommen bei Sublymaster!"}
                 footer={
-                    <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" onClick={closeModal}>
-                        Später entscheiden
-                    </button>
+                    registrationSuccess ? (
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-all w-full shadow-lg shadow-indigo-200"
+                        >
+                            Zum Login
+                        </button>
+                    ) : (
+                        <div className="flex gap-4 w-full">
+                            <button
+                                onClick={closeModal}
+                                className="flex-1 bg-gray-100 text-gray-700 px-4 py-2 rounded-xl font-bold hover:bg-gray-200 transition-all"
+                            >
+                                Später
+                            </button>
+                            <button
+                                onClick={() => handlePlanSelect('pro')}
+                                className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-indigo-700 transition-all"
+                            >
+                                Jetzt wählen
+                            </button>
+                        </div>
+                    )
                 }
             >
-                <p className="mb-4">Deine Registrierung war erfolgreich. Wähle jetzt deinen Plan, um direkt loszulegen:</p>
-                <div className="grid grid-cols-1 gap-4 mt-4">
-                    <div className="border rounded-lg p-3 hover:border-indigo-500 cursor-pointer flex items-center justify-between bg-gray-50 group" onClick={() => handlePlanSelect('free')}>
-                        <div className="flex-1">
-                            <h4 className="font-bold text-gray-900 group-hover:text-indigo-600">Free</h4>
-                            <p className="text-xs text-gray-500">Mit Wasserzeichen</p>
+                {registrationSuccess ? (
+                    <div className="py-4 text-center">
+                        <div className="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                            <Mail size={40} />
                         </div>
-                        <div className="text-right">
-                            <span className="font-bold text-lg text-gray-900">0 €</span>
-                        </div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Prüfe dein Postfach!</h4>
+                        <p className="text-gray-600 leading-relaxed mb-4">
+                            Wir haben dir eine Bestätigungs-Email an <span className="font-bold text-indigo-600">{email}</span> gesendet.
+                        </p>
+                        <p className="text-sm text-gray-500 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                            Bitte klicke auf den Link in der Email, um dein Konto zu aktivieren. Danach kannst du dich einloggen und direkt loslegen!
+                        </p>
                     </div>
+                ) : (
+                    <>
+                        <p className="mb-4">Deine Registrierung war erfolgreich. Wähle jetzt deinen Plan, um direkt loszulegen:</p>
+                        <div className="space-y-3">
+                            <div
+                                onClick={() => handlePlanSelect('free')}
+                                className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${plan === 'free' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 hover:border-indigo-200 hover:bg-gray-50'}`}
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="font-bold">Kostenloser Plan</span>
+                                    <span className="text-xs bg-gray-200 px-2 py-0.5 rounded text-gray-600">0€</span>
+                                </div>
+                                <p className="text-xs text-gray-500">Teste Sublimaster mit Basisfunktionen.</p>
+                            </div>
 
-                    <div className="border rounded-lg p-3 hover:border-indigo-500 cursor-pointer flex items-center justify-between bg-indigo-50 border-indigo-100 group" onClick={() => handlePlanSelect('credits')}>
-                        <div className="flex-1">
-                            <h4 className="font-bold text-indigo-900">10er Karte</h4>
-                            <p className="text-xs text-indigo-600">10x ohne Wasserzeichen</p>
+                            <div
+                                onClick={() => handlePlanSelect('pro')}
+                                className={`p-4 border-2 rounded-2xl cursor-pointer transition-all ${plan === 'pro' ? 'border-indigo-600 bg-indigo-50' : 'border-gray-100 hover:border-indigo-200 hover:bg-gray-50'}`}
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="font-bold text-indigo-600">Pro Plan</span>
+                                    <span className="text-xs bg-indigo-600 px-2 py-0.5 rounded text-white font-bold">Empfohlen</span>
+                                </div>
+                                <p className="text-xs text-gray-500">Unlimitierte Designs, KI-Features und mehr.</p>
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <span className="font-bold text-lg text-indigo-700">15,00 €</span>
-                            <span className="block text-[10px] text-indigo-500">Einmalig</span>
-                        </div>
-                    </div>
-
-                    <div className="border-2 border-indigo-600 rounded-lg p-3 relative cursor-pointer flex items-center justify-between bg-white shadow-md hover:shadow-lg transition-shadow" onClick={() => handlePlanSelect('pro')}>
-                        <div className="absolute -top-2.5 right-4 bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full">EMPFOHLEN</div>
-                        <div className="flex-1">
-                            <h4 className="font-bold text-indigo-900">Pro Abo</h4>
-                            <p className="text-xs text-gray-500">Unlimitiert ohne Wasserzeichen</p>
-                        </div>
-                        <div className="text-right">
-                            <span className="font-bold text-lg text-indigo-600">9,99 €</span>
-                            <span className="block text-[10px] text-gray-400">/ Monat</span>
-                        </div>
-                    </div>
-                </div>
+                    </>
+                )}
             </Modal>
 
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-                {/* ... existing form ... */}
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                     <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
                         Konto erstellen
@@ -201,7 +227,6 @@ const RegisterPage = () => {
                                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                 </button>
                             </div>
-                            {/* Password Requirements */}
                             <div className="mt-2 space-y-1">
                                 {requirements.map((req) => (
                                     <div key={req.id} className={`flex items-center text-xs ${req.valid ? 'text-green-600' : 'text-gray-500'}`}>
@@ -261,8 +286,8 @@ const RegisterPage = () => {
                             Einloggen
                         </Link>
                     </p>
-                </div >
-            </div >
+                </div>
+            </div>
         </>
     );
 };
