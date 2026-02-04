@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { User, Save, ArrowLeft, Building, Phone, MapPin, CreditCard, Crown, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PlansModal from '../components/PlansModal';
 
 export default function UserProfile() {
     const { token, logout, login, user } = useAuth();
@@ -10,6 +10,7 @@ export default function UserProfile() {
     const [profile, setProfile] = useState({});
     const [notification, setNotification] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
 
     const countries = [
         "Deutschland", "Österreich", "Schweiz", "Frankreich", "Italien", "Spanien", "Niederlande", "Belgien", "Polen", "Tschechien", "Dänemark", "Luxemburg", "Vereinigtes Königreich", "USA", "Kanada", "Türkei", "Griechenland", "Portugal", "Schweden", "Norwegen", "Finnland"
@@ -79,7 +80,7 @@ export default function UserProfile() {
             ...profile,
             street: profile.street,
             house_number: profile.house_number,
-            zip: profile.zip,
+            zip_code: profile.zip,
             city: profile.city,
             country: profile.country
         };
@@ -128,56 +129,56 @@ export default function UserProfile() {
                     </button>
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <div className="flex flex-col items-start text-left">
-                            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-none mb-3">Mein Profil</h1>
+                            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none mb-2">Mein Profil</h1>
                             <div className="flex flex-wrap items-center gap-2 text-gray-500">
-                                <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
+                                <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
                                     KD-NR: {profile.customer_number || 'Neu'}
                                 </span>
                                 <span className="text-gray-300 mx-1">|</span>
-                                <span className="text-base font-medium">{profile.email}</span>
+                                <span className="text-sm font-medium">{profile.email}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 py-10 max-w-6xl">
+            <div className="container mx-auto px-6 py-6 max-w-6xl">
 
                 {/* STATUS BAR (Plan & Credits) */}
-                <div className="mb-10 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-indigo-600">
-                        <div className="flex items-center gap-5">
-                            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-xl">
-                                <Crown size={32} />
+                <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-indigo-600">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                <Crown size={20} />
                             </div>
                             <div>
-                                <p className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1">Abonnement</p>
-                                <h3 className="text-2xl font-black text-gray-900">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-0.5">Abonnement</p>
+                                <h3 className="text-lg font-black text-gray-900 leading-tight">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
                             </div>
                         </div>
                         <button
                             type="button"
-                            onClick={() => navigate('/plans')}
-                            className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
+                            onClick={() => setIsPlansModalOpen(true)}
+                            className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
                         >
                             Upgrade
                         </button>
                     </div>
 
-                    <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
-                        <div className="flex items-center gap-5">
-                            <div className="p-4 bg-emerald-50 text-emerald-600 rounded-xl">
-                                <CreditCard size={32} />
+                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                                <CreditCard size={20} />
                             </div>
                             <div>
-                                <p className="text-gray-500 text-sm font-bold uppercase tracking-widest mb-1">Guthaben</p>
-                                <h3 className="text-2xl font-black text-gray-900">{profile.credits || 0} <span className="text-sm font-medium text-gray-400">Credits</span></h3>
+                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-0.5">Guthaben</p>
+                                <h3 className="text-lg font-black text-gray-900 leading-tight">{profile.credits || 0} <span className="text-[10px] font-medium text-gray-400">Credits</span></h3>
                             </div>
                         </div>
                         <button
                             type="button"
                             onClick={() => navigate('/transactions')}
-                            className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors text-sm"
+                            className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors text-xs"
                         >
                             Transaktionen
                         </button>
@@ -188,7 +189,7 @@ export default function UserProfile() {
                     <div className="flex flex-col md:flex-row gap-10 items-start">
 
                         {/* LEFT COLUMN: Personal Data & Address (2/3) */}
-                        <div className="w-full md:w-2/3 space-y-10">
+                        <div className="w-full md:w-2/3 space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                                 <div className="px-8 py-6 border-b border-gray-50 bg-gray-50/30 flex items-center gap-4">
                                     <div className="p-2 bg-indigo-600 rounded-lg text-white">
@@ -196,11 +197,11 @@ export default function UserProfile() {
                                     </div>
                                     <h2 className="text-xl font-extrabold text-gray-900">Persönliche Daten & Anschrift</h2>
                                 </div>
-                                <div className="p-8 space-y-8">
+                                <div className="p-6 space-y-4">
                                     {/* ROW 1: Anrede */}
                                     <div className="flex flex-col">
-                                        <div className="w-[140px]">
-                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-bold text-gray-900"
+                                        <div className="w-[100px]">
+                                            <select className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs"
                                                 value={profile.salutation || ''} onChange={e => setProfile({ ...profile, salutation: e.target.value })}>
                                                 <option value="" disabled>ANREDE</option>
                                                 <option value="Herr">Herr</option>
@@ -211,45 +212,45 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* ROW 2: Vorname & Name */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.first_name || ''} onChange={e => setProfile({ ...profile, first_name: e.target.value })}
                                                 placeholder="Vorname" />
                                         </div>
                                         <div>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.last_name || ''} onChange={e => setProfile({ ...profile, last_name: e.target.value })}
                                                 placeholder="Nachname" />
                                         </div>
                                     </div>
 
                                     {/* ROW 3: Straße & Hausnummer */}
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                                         <div className="md:col-span-9">
                                             <div className="relative">
-                                                <MapPin className="absolute left-4 top-4 text-gray-300" size={18} />
-                                                <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                                <MapPin className="absolute left-3 top-2 text-gray-300" size={14} />
+                                                <input type="text" className="w-full border-gray-300 rounded-lg pl-9 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border pr-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                     value={profile.street || ''} onChange={e => setProfile({ ...profile, street: e.target.value })}
                                                     placeholder="Strasse" />
                                             </div>
                                         </div>
                                         <div className="md:col-span-3">
-                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.house_number || ''} onChange={e => setProfile({ ...profile, house_number: e.target.value })}
-                                                placeholder="Hausnummer" />
+                                                placeholder="Hausnr." />
                                         </div>
                                     </div>
 
                                     {/* ROW 4: PLZ & Ort */}
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                                         <div className="md:col-span-4">
-                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.zip || ''} onChange={e => setProfile({ ...profile, zip: e.target.value })}
                                                 placeholder="PLZ" />
                                         </div>
                                         <div className="md:col-span-8">
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.city || ''} onChange={e => setProfile({ ...profile, city: e.target.value })}
                                                 placeholder="Ort" />
                                         </div>
@@ -257,7 +258,7 @@ export default function UserProfile() {
 
                                     {/* ROW 5: Land */}
                                     <div className="flex flex-col">
-                                        <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 transition-all"
+                                        <select className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs transition-all"
                                             value={profile.country || 'Deutschland'} onChange={e => setProfile({ ...profile, country: e.target.value })}>
                                             {countries.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
@@ -266,8 +267,8 @@ export default function UserProfile() {
                                     {/* ROW 6: Telefon */}
                                     <div>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-4 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <Phone className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <input type="text" className="w-full border-gray-300 rounded-lg pl-9 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border pr-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.phone || ''} onChange={e => setProfile({ ...profile, phone: e.target.value })}
                                                 placeholder="Telefon" />
                                         </div>
@@ -276,8 +277,8 @@ export default function UserProfile() {
                                     {/* ROW 7: Mobil */}
                                     <div>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-4 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <Phone className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <input type="text" className="w-full border-gray-300 rounded-lg pl-9 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border pr-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.mobile || ''} onChange={e => setProfile({ ...profile, mobile: e.target.value })}
                                                 placeholder="Mobil" />
                                         </div>
@@ -287,7 +288,7 @@ export default function UserProfile() {
                         </div>
 
                         {/* RIGHT COLUMN: Company Data (1/3) */}
-                        <div className="w-full md:w-1/3 space-y-10">
+                        <div className="w-full md:w-1/3 space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                                 <div className="px-8 py-6 border-b border-gray-50 bg-gray-50/30 flex items-center gap-4">
                                     <div className="p-2 bg-indigo-600 rounded-lg text-white">
@@ -295,28 +296,28 @@ export default function UserProfile() {
                                     </div>
                                     <h2 className="text-xl font-extrabold text-gray-900">Firmendaten</h2>
                                 </div>
-                                <div className="p-8 space-y-8">
+                                <div className="p-6 space-y-4">
                                     {/* ROW 1: Firmenname */}
                                     <div>
                                         <div className="relative">
-                                            <Building className="absolute left-4 top-4 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <Building className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <input type="text" className="w-full border-gray-300 rounded-lg pl-9 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border pr-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.company_name || ''} onChange={e => setProfile({ ...profile, company_name: e.target.value })}
                                                 placeholder="Firmenname (Optional)" />
                                         </div>
                                     </div>
 
-                                    {/* ROW 2: Rechtsform & USt-IdNr side-by-side */}
-                                    <div className="grid grid-cols-1 gap-6">
+                                    {/* ROW 2: Rechtsform & USt-IdNr */}
+                                    <div className="grid grid-cols-1 gap-3">
                                         <div>
-                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 transition-all"
+                                            <select className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs transition-all"
                                                 value={profile.legal_form || ''} onChange={e => setProfile({ ...profile, legal_form: e.target.value })}>
                                                 <option value="" disabled>RECHTSFORM</option>
                                                 {legalForms.map(f => <option key={f} value={f}>{f}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
+                                            <input type="text" className="w-full border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 py-1.5 border px-3 font-bold text-gray-900 text-xs placeholder:text-gray-300 placeholder:font-bold placeholder:uppercase placeholder:text-[9px]"
                                                 value={profile.vat_id || ''} onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
                                                 placeholder="USt-IdNr." />
                                         </div>
@@ -324,14 +325,24 @@ export default function UserProfile() {
                                 </div>
                             </div>
 
-                            <button type="submit" disabled={isSaving} className="w-full bg-indigo-600 text-white px-8 py-5 rounded-2xl hover:bg-indigo-700 flex items-center justify-center gap-3 shadow-2xl shadow-indigo-100 transition-all transform active:scale-95 font-black text-xl group">
-                                <Save size={24} className="group-hover:rotate-12 transition-transform" />
+                            <button type="submit" disabled={isSaving} className="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 transition-all transform active:scale-95 font-black text-lg group">
+                                <Save size={20} className="group-hover:rotate-12 transition-transform" />
                                 {isSaving ? 'Speichere...' : 'Änderungen speichern'}
                             </button>
                         </div>
 
                     </div>
                 </form>
+                <PlansModal
+                    isOpen={isPlansModalOpen}
+                    onClose={() => setIsPlansModalOpen(false)}
+                    onSelectPlan={(planId) => {
+                        console.log('Selected plan:', planId);
+                        // Stripe integration placeholder
+                        setIsPlansModalOpen(false);
+                        showNotify('Plan-Auswahl wird verarbeitet...');
+                    }}
+                />
             </div>
         </div>
     );
