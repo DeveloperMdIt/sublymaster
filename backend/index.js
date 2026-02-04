@@ -518,11 +518,13 @@ app.put('/api/admin/plans/:id', authenticateAdmin, async (req, res) => {
 // TEMPLATES ENDPOINT
 // ============================================
 
+
 app.get('/api/templates', (req, res) => {
+    // Templates in pixels (1mm = 4px for screen display)
     const templates = [
-        { id: 'mug', name: 'Tasse (Standard)', width: 210, height: 90 },
-        { id: 'bottle', name: 'Flasche', width: 180, height: 120 },
-        { id: 'shirt', name: 'T-Shirt', width: 250, height: 300 }
+        { id: 'mug', name: 'Tasse (Standard)', width: 840, height: 360 },  // 210x90mm
+        { id: 'bottle', name: 'Flasche', width: 720, height: 480 },        // 180x120mm
+        { id: 'shirt', name: 'T-Shirt', width: 1000, height: 1200 }        // 250x300mm
     ];
     res.json(templates);
 });
