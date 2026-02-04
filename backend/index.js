@@ -819,6 +819,19 @@ app.get('/api/admin/migrate-crm', authenticateAdmin, async (req, res) => {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // 6. Transactions Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(50) NOT NULL, -- 'credits_buy', 'plan_change', 'print_cost'
+                description VARCHAR(255),
+                amount DECIMAL(10,2),
+                credits INTEGER,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
         
         // 6. Indices (Ignore errors if exist)
         try { await db.run('CREATE INDEX IF NOT EXISTS idx_users_public_id ON users(public_id)'); } catch(e){}
@@ -935,6 +948,19 @@ app.get('/api/history', authenticateToken, async (req, res) => {
         res.json(history);
     } catch (err) {
         console.error('Get history error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/transactions', authenticateToken, async (req, res) => {
+    try {
+        const transactions = await db.getAll(
+            'SELECT id, type, description, amount, credits, timestamp FROM transactions WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 50',
+            [req.user.id]
+        );
+        res.json(transactions || []);
+    } catch (err) {
+        console.error('Get transactions error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

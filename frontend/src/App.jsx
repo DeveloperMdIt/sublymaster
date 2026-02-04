@@ -11,6 +11,8 @@ import PrintHistory from './pages/PrintHistory';
 import Impressum from './pages/Impressum';
 import Datenschutz from './pages/Datenschutz';
 import AGB from './pages/AGB';
+import Plans from './pages/Plans';
+import Transactions from './pages/Transactions';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import { Logo } from './components/Logo';
@@ -106,6 +108,8 @@ function App() {
               <Route path="/impressum" element={<Impressum />} />
               <Route path="/datenschutz" element={<Datenschutz />} />
               <Route path="/agb" element={<AGB />} />
+              <Route path="/plans" element={<Plans />} />
+              <Route path="/transactions" element={<Transactions />} />
             </Routes>
           </main>
           <Footer />
