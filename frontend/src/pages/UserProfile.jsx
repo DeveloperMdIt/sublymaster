@@ -237,7 +237,7 @@ export default function UserProfile() {
                                             <MapPin className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                className="w-full rounded-lg border border-gray-300 !pl-12 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
                                                 placeholder="Straße"
                                                 value={profile.street || ''}
                                                 onChange={e => setProfile({ ...profile, street: e.target.value })}
@@ -293,7 +293,7 @@ export default function UserProfile() {
                                             <Phone className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                className="w-full rounded-lg border border-gray-300 !pl-12 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
                                                 placeholder="Telefon"
                                                 value={profile.phone || ''}
                                                 onChange={e => setProfile({ ...profile, phone: e.target.value })}
@@ -306,7 +306,7 @@ export default function UserProfile() {
                                             <Phone className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                className="w-full rounded-lg border border-gray-300 !pl-12 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
                                                 placeholder="Mobil"
                                                 value={profile.mobile || ''}
                                                 onChange={e => setProfile({ ...profile, mobile: e.target.value })}
@@ -332,7 +332,7 @@ export default function UserProfile() {
                                         <Building className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            className="w-full rounded-lg border border-gray-300 !pl-12 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
                                             placeholder="Firma"
                                             value={profile.company_name || ''}
                                             onChange={e => setProfile({ ...profile, company_name: e.target.value })}
