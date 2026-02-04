@@ -1085,8 +1085,12 @@ const CanvasEditor = () => {
                     className="relative border-r border-gray-300 mr-1 select-none text-[10px] text-gray-400"
                     style={{ height: allTemplates[template]?.height || 500, width: '30px' }}
                 >
-                    {allTemplates[template] && [...Array(Math.floor((allTemplates[template].height / 4) / 5) + 1)].map((_, i) => {
+                    {allTemplates[template] && [...Array(Math.ceil((allTemplates[template].height / 4) / 5) + 1)].map((_, i) => {
                         const is10mm = i % 2 === 0; // Every 2nd tick is 10mm
+                        const mmValue = i * 5;
+                        const maxMm = allTemplates[template].height / 4;
+                        if (mmValue > maxMm) return null; // Don't show ticks beyond template height
+
                         return (
                             <div
                                 key={i}
@@ -1096,7 +1100,7 @@ const CanvasEditor = () => {
                                     width: is10mm ? '8px' : '4px' // 10mm: longer, 5mm: shorter
                                 }}
                             >
-                                {is10mm && <span className="absolute right-3 -top-2">{i * 5}</span>}
+                                {is10mm && <span className="absolute right-3 -top-2">{mmValue}</span>}
                             </div>
                         );
                     })}
@@ -1108,8 +1112,12 @@ const CanvasEditor = () => {
                         className="relative border-b border-gray-300 mb-1 select-none text-[10px] text-gray-400"
                         style={{ width: allTemplates[template]?.width || 800, height: '20px' }}
                     >
-                        {[...Array(Math.floor((allTemplates[template]?.width / 4) / 5) + 1)].map((_, i) => {
+                        {[...Array(Math.ceil((allTemplates[template]?.width / 4) / 5) + 1)].map((_, i) => {
                             const is10mm = i % 2 === 0; // Every 2nd tick is 10mm
+                            const mmValue = i * 5;
+                            const maxMm = allTemplates[template]?.width / 4;
+                            if (mmValue > maxMm) return null; // Don't show ticks beyond template width
+
                             return (
                                 <div
                                     key={i}
@@ -1119,7 +1127,7 @@ const CanvasEditor = () => {
                                         height: is10mm ? '8px' : '4px' // 10mm: longer, 5mm: shorter
                                     }}
                                 >
-                                    {is10mm && <span className="absolute top-[-15px] -left-2">{i * 5}</span>}
+                                    {is10mm && <span className="absolute top-[-15px] -left-2">{mmValue}</span>}
                                 </div>
                             );
                         })}
