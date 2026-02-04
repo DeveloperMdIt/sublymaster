@@ -137,7 +137,7 @@ export default function UserProfile() {
                 </div>
             )}
 
-            <div className="container mx-auto px-6 py-10 max-w-6xl">
+            <div className="container mx-auto px-6 py-10 max-w-7xl">
 
                 {/* TOP CARDS: Subscription & Credits */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -187,7 +187,7 @@ export default function UserProfile() {
                 <form onSubmit={handleSaveProfile} className="space-y-8">
                     <div className="grid grid-cols-12 gap-6 items-start">
                         {/* LINKS (2/3) */}
-                        <section className="col-span-12 lg:col-span-8">
+                        <section className="col-span-12 md:col-span-8">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
@@ -215,7 +215,7 @@ export default function UserProfile() {
                                     <div className="col-span-12 md:col-span-4">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="Vorname"
                                             value={profile.first_name || ''}
                                             onChange={e => setProfile({ ...profile, first_name: e.target.value })}
@@ -226,7 +226,7 @@ export default function UserProfile() {
                                     <div className="col-span-12 md:col-span-5">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="Nachname"
                                             value={profile.last_name || ''}
                                             onChange={e => setProfile({ ...profile, last_name: e.target.value })}
@@ -236,10 +236,10 @@ export default function UserProfile() {
                                     {/* Straße */}
                                     <div className="col-span-12 md:col-span-9">
                                         <div className="relative">
-                                            <MapPin className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <MapPin className="absolute left-3 top-2 text-gray-400" size={14} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                                 placeholder="Straße"
                                                 value={profile.street || ''}
                                                 onChange={e => setProfile({ ...profile, street: e.target.value })}
@@ -251,7 +251,7 @@ export default function UserProfile() {
                                     <div className="col-span-12 md:col-span-3">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="Nr."
                                             value={profile.house_number || ''}
                                             onChange={e => setProfile({ ...profile, house_number: e.target.value })}
@@ -262,7 +262,7 @@ export default function UserProfile() {
                                     <div className="col-span-12 md:col-span-3">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="PLZ"
                                             value={profile.zip || ''}
                                             onChange={e => setProfile({ ...profile, zip: e.target.value })}
@@ -273,7 +273,7 @@ export default function UserProfile() {
                                     <div className="col-span-12 md:col-span-9">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="Ort"
                                             value={profile.city || ''}
                                             onChange={e => setProfile({ ...profile, city: e.target.value })}
@@ -294,10 +294,10 @@ export default function UserProfile() {
                                     {/* Telefon */}
                                     <div className="col-span-12 md:col-span-6">
                                         <div className="relative">
-                                            <Phone className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <Phone className="absolute left-3 top-2 text-gray-400" size={14} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                                 placeholder="Telefon"
                                                 value={profile.phone || ''}
                                                 onChange={e => setProfile({ ...profile, phone: e.target.value })}
@@ -308,10 +308,10 @@ export default function UserProfile() {
                                     {/* Mobil */}
                                     <div className="col-span-12 md:col-span-6">
                                         <div className="relative">
-                                            <Phone className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <Phone className="absolute left-3 top-2 text-gray-400" size={14} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                                 placeholder="Mobil"
                                                 value={profile.mobile || ''}
                                                 onChange={e => setProfile({ ...profile, mobile: e.target.value })}
@@ -323,7 +323,7 @@ export default function UserProfile() {
                         </section>
 
                         {/* RECHTS (1/3) */}
-                        <aside className="col-span-12 lg:col-span-4 space-y-6">
+                        <aside className="col-span-12 md:col-span-4 space-y-6">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
@@ -335,10 +335,10 @@ export default function UserProfile() {
                                 <div className="grid grid-cols-12 gap-4">
                                     <div className="col-span-12">
                                         <div className="relative">
-                                            <Building className="absolute left-3 top-2 text-gray-300" size={14} />
+                                            <Building className="absolute left-3 top-2 text-gray-400" size={14} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                                className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                                 placeholder="Firma"
                                                 value={profile.company_name || ''}
                                                 onChange={e => setProfile({ ...profile, company_name: e.target.value })}
@@ -360,7 +360,7 @@ export default function UserProfile() {
                                     <div className="col-span-12">
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-300 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             placeholder="USt-IdNr."
                                             value={profile.vat_id || ''}
                                             onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
