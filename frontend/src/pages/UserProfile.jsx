@@ -186,26 +186,25 @@ export default function UserProfile() {
 
                 <form onSubmit={handleSaveProfile} className="space-y-8 text-left">
                     <div className="grid grid-cols-12 gap-6 items-start">
-                        {/* LINKS (2/3) */}
-                        <section className="col-span-12 md:col-span-8">
+                        {/* LINKE SEITE (2/3): Persönliche Daten */}
+                        <section className="col-span-12 lg:col-span-8">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
                                         <User size={20} />
                                     </div>
-                                    <h2 className="text-base font-semibold text-gray-900">Persönliche Daten & Anschrift</h2>
+                                    <h2 className="text-base font-bold text-gray-900">Persönliche Daten & Anschrift</h2>
                                 </div>
 
                                 <div className="grid grid-cols-12 gap-4">
                                     {/* ZEILE 1: ANREDE (3), VORNAME (4), NACHNAME (5) */}
                                     <div className="col-span-12 sm:col-span-3">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Anrede</label>
                                         <select
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 bg-white outline-none"
                                             value={profile.salutation || ''}
                                             onChange={e => setProfile({ ...profile, salutation: e.target.value })}
                                         >
-                                            <option value="" disabled>Wählen...</option>
+                                            <option value="" disabled>Anrede</option>
                                             <option value="Herr">Herr</option>
                                             <option value="Frau">Frau</option>
                                             <option value="Divers">Divers</option>
@@ -213,22 +212,20 @@ export default function UserProfile() {
                                     </div>
 
                                     <div className="col-span-12 sm:col-span-4">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Vorname</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="Max"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="Vorname"
                                             value={profile.first_name || ''}
                                             onChange={e => setProfile({ ...profile, first_name: e.target.value })}
                                         />
                                     </div>
 
                                     <div className="col-span-12 sm:col-span-5">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Nachname</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="Mustermann"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="Nachname"
                                             value={profile.last_name || ''}
                                             onChange={e => setProfile({ ...profile, last_name: e.target.value })}
                                         />
@@ -236,13 +233,12 @@ export default function UserProfile() {
 
                                     {/* ZEILE 2: STRASSE (9) & HAUSNUMMER (3) */}
                                     <div className="col-span-12 sm:col-span-9">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Straße</label>
                                         <div className="relative">
                                             <MapPin className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                placeholder="Hauptstraße"
+                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                placeholder="Straße"
                                                 value={profile.street || ''}
                                                 onChange={e => setProfile({ ...profile, street: e.target.value })}
                                             />
@@ -250,11 +246,10 @@ export default function UserProfile() {
                                     </div>
 
                                     <div className="col-span-12 sm:col-span-3">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Nr.</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="12a"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="Nr."
                                             value={profile.house_number || ''}
                                             onChange={e => setProfile({ ...profile, house_number: e.target.value })}
                                         />
@@ -262,22 +257,20 @@ export default function UserProfile() {
 
                                     {/* ZEILE 3: PLZ (4) & ORT (8) */}
                                     <div className="col-span-12 sm:col-span-4">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">PLZ</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="12345"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="PLZ"
                                             value={profile.zip || ''}
                                             onChange={e => setProfile({ ...profile, zip: e.target.value })}
                                         />
                                     </div>
 
                                     <div className="col-span-12 sm:col-span-8">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Ort</label>
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="Berlin"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="Ort"
                                             value={profile.city || ''}
                                             onChange={e => setProfile({ ...profile, city: e.target.value })}
                                         />
@@ -285,9 +278,8 @@ export default function UserProfile() {
 
                                     {/* ZEILE 4: LAND (VOLLE BREITE) */}
                                     <div className="col-span-12">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Land</label>
                                         <select
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white"
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 bg-white outline-none"
                                             value={profile.country || 'Deutschland'}
                                             onChange={e => setProfile({ ...profile, country: e.target.value })}
                                         >
@@ -297,13 +289,12 @@ export default function UserProfile() {
 
                                     {/* ZEILE 5: TELEFON & MOBIL */}
                                     <div className="col-span-12 sm:col-span-6">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Telefon</label>
                                         <div className="relative">
                                             <Phone className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                placeholder="+49 30 123456"
+                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                placeholder="Telefon"
                                                 value={profile.phone || ''}
                                                 onChange={e => setProfile({ ...profile, phone: e.target.value })}
                                             />
@@ -311,13 +302,12 @@ export default function UserProfile() {
                                     </div>
 
                                     <div className="col-span-12 sm:col-span-6">
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Mobil</label>
                                         <div className="relative">
                                             <Phone className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                             <input
                                                 type="text"
-                                                className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                placeholder="+49 170 1234567"
+                                                className="w-full rounded-lg border border-gray-300 pl-10 pr-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                                placeholder="Mobil"
                                                 value={profile.mobile || ''}
                                                 onChange={e => setProfile({ ...profile, mobile: e.target.value })}
                                             />
@@ -327,66 +317,59 @@ export default function UserProfile() {
                             </div>
                         </section>
 
-                        {/* RECHTS (1/3) */}
-                        <aside className="col-span-12 md:col-span-4 flex flex-col gap-6">
+                        {/* RECHTE SEITE (1/3): Firmendaten */}
+                        <aside className="col-span-12 lg:col-span-4 space-y-6">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
                                         <Briefcase size={20} />
                                     </div>
-                                    <h2 className="text-base font-black text-slate-900 uppercase tracking-tight">Firmendaten</h2>
+                                    <h2 className="text-base font-bold text-gray-900">Firmendaten</h2>
                                 </div>
 
                                 <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Firma</label>
-                                        <div className="relative">
-                                            <Building className="absolute left-3 top-2.5 text-gray-400" size={16} />
-                                            <input
-                                                type="text"
-                                                className="w-full rounded-lg border border-gray-200 pl-10 pr-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                                placeholder="MD IT Solutions"
-                                                value={profile.company_name || ''}
-                                                onChange={e => setProfile({ ...profile, company_name: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">Rechtsform</label>
-                                        <select
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white"
-                                            value={profile.legal_form || ''}
-                                            onChange={e => setProfile({ ...profile, legal_form: e.target.value })}
-                                        >
-                                            <option value="" disabled>Wählen...</option>
-                                            {legalForms.map(f => <option key={f} value={f}>{f}</option>)}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 ml-1">USt-IdNr.</label>
+                                    <div className="relative">
+                                        <Building className="absolute left-3 top-2.5 text-gray-400" size={16} />
                                         <input
                                             type="text"
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                            placeholder="DE123456789"
-                                            value={profile.vat_id || ''}
-                                            onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
+                                            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                            placeholder="Firma"
+                                            value={profile.company_name || ''}
+                                            onChange={e => setProfile({ ...profile, company_name: e.target.value })}
                                         />
                                     </div>
+
+                                    <select
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 bg-white outline-none"
+                                        value={profile.legal_form || ''}
+                                        onChange={e => setProfile({ ...profile, legal_form: e.target.value })}
+                                    >
+                                        <option value="" disabled>Rechtsform</option>
+                                        {legalForms.map(f => <option key={f} value={f}>{f}</option>)}
+                                    </select>
+
+                                    <input
+                                        type="text"
+                                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none"
+                                        placeholder="USt-IdNr."
+                                        value={profile.vat_id || ''}
+                                        onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
+                                    />
                                 </div>
                             </div>
-
-                            {/* SAVE BUTTON - Jetzt hier rechts integriert */}
-                            <button
-                                type="submit"
-                                disabled={isSaving}
-                                className="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl hover:bg-indigo-700 flex items-center justify-center gap-3 shadow-xl shadow-indigo-200 transition-all active:scale-[0.98] font-black text-lg group"
-                            >
-                                <Save size={22} className="group-hover:rotate-12 transition-transform" />
-                                {isSaving ? 'Speichere...' : 'Speichern'}
-                            </button>
                         </aside>
+                    </div>
+
+                    {/* Speichern Button - Wieder unten über volle Breite */}
+                    <div className="mt-8">
+                        <button
+                            type="submit"
+                            disabled={isSaving}
+                            className="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl font-black text-xl shadow-lg hover:bg-indigo-700 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                        >
+                            <Save size={24} />
+                            {isSaving ? 'Speichere...' : 'Änderungen speichern'}
+                        </button>
                     </div>
                 </form>
 
