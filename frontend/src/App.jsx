@@ -62,10 +62,13 @@ const Navigation = () => {
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-600">
                 <div className="text-gray-300 flex flex-col items-end">
                   <span className="font-semibold">{getGreeting()}</span>
-                  <div className="flex items-center gap-1 text-xs text-indigo-400">
-                    {user.plan_id > 1 ? <Crown size={12} /> : <CreditCard size={12} />}
-                    {getPlanLabel()}
-                  </div>
+                  <Link
+                    to="/profile?openPlans=true"
+                    className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors group"
+                  >
+                    {user.plan_id > 1 ? <Crown size={12} className="group-hover:scale-110 transition-transform" /> : <CreditCard size={12} className="group-hover:scale-110 transition-transform" />}
+                    <span className="group-hover:underline">{getPlanLabel()}</span>
+                  </Link>
                 </div>
 
                 <Link to="/profile" className="p-2 hover:bg-gray-800 rounded-full transition-colors" title="Einstellungen">

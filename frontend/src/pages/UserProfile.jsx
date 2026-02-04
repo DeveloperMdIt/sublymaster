@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Crown, CreditCard, User, MapPin, Phone, Briefcase, Building, Save } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, Crown, CreditCard, User, MapPin, Phone, Briefcase, Building, Save, ExternalLink } from 'lucide-react';
 import PlansModal from '../components/PlansModal';
 
 export default function UserProfile() {
     const { token, logout, login, user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState({});
     const [notification, setNotification] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        if (queryParams.get('openPlans') === 'true') {
+            setIsPlansModalOpen(true);
+        }
+    }, [location]);
+
+    const getPlanLabel = () => {
+        if (!user) return 'Free Plan';
+        if (user.plan_id === 1) return 'Free Plan';
+        if (user.plan_id === 2) return 'Pro Plan';
+        if (user.plan_id === 3) return 'Business Plan';
+        return 'Free Plan';
+    };
 
     const countries = [
         "Deutschland", "Österreich", "Schweiz", "Frankreich", "Italien", "Spanien", "Niederlande", "Belgien", "Polen", "Tschechien", "Dänemark", "Luxemburg", "Vereinigtes Königreich", "USA", "Kanada", "Türkei", "Griechenland", "Portugal", "Schweden", "Norwegen", "Finnland"
@@ -110,83 +126,65 @@ export default function UserProfile() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-gray-500">Lade Profil...</div>;
+    if (loading) return <div className="p-8 text-center text-gray-500 font-bold">Lade Profil...</div>;
 
     return (
         <div className="bg-gray-50 min-h-screen pb-20">
             {/* Notification Toast */}
             {notification && (
-                <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg text-white shadow-2xl z-50 animate-fade-in ${notification.type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`}>
+                <div className={`fixed top-4 right-4 px-6 py-3 rounded-xl text-white shadow-2xl z-50 animate-fade-in font-bold ${notification.type === 'error' ? 'bg-red-500' : 'bg-emerald-500'}`}>
                     {notification.message}
                 </div>
             )}
 
-            {/* Header Area */}
-            <div className="bg-white border-b border-gray-200">
-                <div className="container mx-auto px-6 py-10 max-w-6xl">
-                    <button onClick={handleBack} className="flex items-center text-gray-400 hover:text-indigo-600 mb-6 transition-all group font-medium">
-                        <ArrowLeft size={20} className="mr-2 transform group-hover:-translate-x-1 transition-transform" />
-                        {user?.role === 'admin' || user?.role === 'ADMIN' ? 'Zurück zum Admin-Dashboard' : 'Zurück zum Editor'}
-                    </button>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                        <div className="flex flex-col items-start text-left">
-                            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-none mb-2">Mein Profil</h1>
-                            <div className="flex flex-wrap items-center gap-2 text-gray-500">
-                                <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-indigo-100 shadow-sm">
-                                    KD-NR: {profile.customer_number || 'Neu'}
-                                </span>
-                                <span className="text-gray-300 mx-1">|</span>
-                                <span className="text-sm font-medium">{profile.email}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div className="container mx-auto px-6 py-10 max-w-6xl">
 
-            <div className="container mx-auto px-6 py-6 max-w-6xl">
-
-                {/* STATUS BAR (Plan & Credits) */}
-                <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-indigo-600">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-                                <Crown size={20} />
+                {/* TOP CARDS: Subscription & Credits */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    {/* Subscription Card */}
+                    <div className="bg-white rounded-xl border-l-[6px] border-l-indigo-600 border-y border-r border-gray-100 p-6 shadow-xl shadow-gray-200/50 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 shadow-inner">
+                                <Crown size={24} />
                             </div>
                             <div>
-                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-0.5">Abonnement</p>
-                                <h3 className="text-lg font-black text-gray-900 leading-tight">{profile.plan_id === 1 ? 'Free Plan' : profile.plan_id === 2 ? 'Pro Plan' : 'Business'}</h3>
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-0.5">Abonnement</p>
+                                <h3 className="text-xl font-black text-slate-900 leading-tight">{getPlanLabel()}</h3>
                             </div>
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsPlansModalOpen(true)}
-                            className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
+                            className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-black text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95"
                         >
                             Upgrade
                         </button>
                     </div>
 
-                    <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex items-center justify-between border-l-4 border-l-emerald-500">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                                <CreditCard size={20} />
+                    {/* Credits Card */}
+                    <div className="bg-white rounded-xl border-l-[6px] border-l-emerald-500 border-y border-r border-gray-100 p-6 shadow-xl shadow-gray-200/50 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner">
+                                <CreditCard size={24} />
                             </div>
                             <div>
-                                <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-0.5">Guthaben</p>
-                                <h3 className="text-lg font-black text-gray-900 leading-tight">{profile.credits || 0} <span className="text-[10px] font-medium text-gray-400">Credits</span></h3>
+                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-0.5">Guthaben</p>
+                                <h3 className="text-xl font-black text-slate-900 leading-tight">
+                                    {user?.credits || 0} <span className="text-sm font-bold text-slate-400 ml-1">Credits</span>
+                                </h3>
                             </div>
                         </div>
                         <button
                             type="button"
                             onClick={() => navigate('/transactions')}
-                            className="text-emerald-600 font-bold hover:text-emerald-700 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition-colors text-xs"
+                            className="flex items-center gap-1.5 text-emerald-600 font-black text-sm hover:text-emerald-700 transition-colors"
                         >
                             Transaktionen
                         </button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSaveProfile}>
+                <form onSubmit={handleSaveProfile} className="space-y-8">
                     <div className="grid grid-cols-12 gap-6 items-start">
                         {/* LINKS (2/3) */}
                         <section className="col-span-12 lg:col-span-8">
@@ -370,24 +368,25 @@ export default function UserProfile() {
                                     </div>
                                 </div>
                             </div>
-
-                            <button
-                                type="submit"
-                                disabled={isSaving}
-                                className="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2 shadow-xl shadow-indigo-100 transition-all transform active:scale-95 font-black text-lg group"
-                            >
-                                <Save size={20} className="group-hover:rotate-12 transition-transform" />
-                                {isSaving ? 'Speichere...' : 'Änderungen speichern'}
-                            </button>
                         </aside>
                     </div>
+
+                    {/* SAVE BUTTON AT THE BOTTOM */}
+                    <button
+                        type="submit"
+                        disabled={isSaving}
+                        className="w-full bg-indigo-600 text-white px-6 py-4 rounded-xl hover:bg-indigo-700 flex items-center justify-center gap-3 shadow-2xl shadow-indigo-200 transition-all transform active:scale-[0.98] font-black text-xl group"
+                    >
+                        <Save size={24} className="group-hover:rotate-12 transition-transform" />
+                        {isSaving ? 'Speichere...' : 'Änderungen speichern'}
+                    </button>
                 </form>
+
                 <PlansModal
                     isOpen={isPlansModalOpen}
                     onClose={() => setIsPlansModalOpen(false)}
                     onSelectPlan={(planId) => {
                         console.log('Selected plan:', planId);
-                        // Stripe integration placeholder
                         setIsPlansModalOpen(false);
                         showNotify('Plan-Auswahl wird verarbeitet...');
                     }}
