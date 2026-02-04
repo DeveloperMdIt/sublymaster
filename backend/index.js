@@ -166,14 +166,26 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.password_hash);
+        // Handle both possible column names from legacy/migration state
+        const pwdHash = user.password_hash || user.password;
+        if (!pwdHash) {
+            console.error('Login Error: No password hash found for user', user.id);
+            return res.status(500).json({ error: 'Server configuration error' });
+        }
+
+        const validPassword = await bcrypt.compare(password, pwdHash);
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Fetch profile data
-        const profile = await db.getOne('SELECT first_name, last_name FROM user_profiles WHERE user_id = $1', [user.id]);
-        const first_name = profile ? profile.first_name : null;
+        // Fetch profile data (safely)
+        let first_name = null;
+        try {
+            const profile = await db.getOne('SELECT first_name, last_name FROM user_profiles WHERE user_id = $1', [user.id]);
+            if (profile) first_name = profile.first_name;
+        } catch (e) {
+            console.warn('Could not fetch user profile (migration pending?):', e.message);
+        }
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role, first_name },

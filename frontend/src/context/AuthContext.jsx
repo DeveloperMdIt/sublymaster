@@ -8,17 +8,45 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (token) {
-            // Ideally verify token with backend here, 
-            // for now we decode or just assume logged in if we have user data stored
-            // or we could fetch user profile
-            // Let's just persist basic user info for simplicity if stored
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
+        const initAuth = async () => {
+            if (token) {
+                // Try to load from local storage first for speed
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                }
+
+                // Then fetch fresh data from backend to ensure sync (credits, plan, names)
+                try {
+                    const res = await fetch('/api/user/profile', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        // Merge essential data
+                        const updatedUser = {
+                            ...(JSON.parse(storedUser || '{}')),
+                            id: data.id,
+                            email: data.email,
+                            role: data.role,
+                            plan_id: data.plan_id,
+                            credits: data.credits,
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            customer_number: data.customer_number
+                        };
+                        setUser(updatedUser);
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                    }
+                } catch (err) {
+                    console.error("Auth sync failed", err);
+                    // If 401, maybe logout? For now just ignore
+                }
             }
-        }
-        setLoading(false);
+            setLoading(false);
+        };
+
+        initAuth();
     }, [token]);
 
     const login = (userData, authToken) => {
