@@ -159,43 +159,32 @@ app.post('/api/register', async (req, res) => {
 // Login
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Bitte Email und Passwort angeben' });
-    }
 
     try {
-        // Get user
         const user = await db.getOne('SELECT * FROM users WHERE email = $1', [email]);
-        
         if (!user) {
-            return res.status(400).json({ error: 'Benutzer nicht gefunden' });
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Check password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ error: 'Ungültiges Passwort' });
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Create JWT token
+        // Fetch profile data
+        const profile = await db.getOne('SELECT first_name, last_name FROM user_profiles WHERE user_id = $1', [user.id]);
+        const first_name = profile ? profile.first_name : null;
+
         const token = jwt.sign(
-            {
-                id: user.id,
-                email: user.email,
-                role: user.role,
-                plan_id: user.plan_id,
-                account_status: user.account_status
-            },
+            { id: user.id, email: user.email, role: user.role, first_name },
             JWT_SECRET,
             { expiresIn: '24h' }
         );
 
-        // Log activity
+        // Update last login
         await db.run(
             'INSERT INTO user_activity (user_id, action, ip_address) VALUES ($1, $2, $3)',
-            [user.id, 'LOGIN', ip]
+            [user.id, 'LOGIN', req.headers['x-forwarded-for'] || req.socket.remoteAddress]
         );
 
         res.json({
@@ -209,7 +198,9 @@ app.post('/api/login', async (req, res) => {
                 account_status: user.account_status,
                 credits: user.credits || 0,
                 printer_model: user.printer_model,
-                default_offset: user.default_offset || 0
+                default_offset: user.default_offset || 0,
+                customer_number: user.customer_number,
+                first_name: first_name
             }
         });
     } catch (err) {
@@ -463,12 +454,18 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
 // ADMIN ENDPOINTS
 // ============================================
 
-// Get all users
+// Get all users (with profile data)
 app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
     try {
-        const users = await db.getAll(
-            'SELECT id, email, role, plan_id, credits, account_status, created_at FROM users ORDER BY created_at DESC'
-        );
+        const users = await db.getAll(`
+            SELECT u.id, u.email, u.role, u.plan_id, u.credits, u.account_status, u.created_at,
+                   p.first_name, p.last_name,
+                   s.name as plan_name
+            FROM users u
+            LEFT JOIN user_profiles p ON u.id = p.user_id
+            LEFT JOIN plans s ON u.plan_id = s.id
+            ORDER BY u.created_at DESC
+        `);
         res.json(users);
     } catch (err) {
         console.error('Get users error:', err);
@@ -489,6 +486,17 @@ app.put('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
         res.json({ message: 'User updated' });
     } catch (err) {
         console.error('Update user error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete user
+app.delete('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
+    try {
+        await db.run('DELETE FROM users WHERE id = $1', [req.params.id]);
+        res.json({ message: 'User deleted' });
+    } catch (err) {
+        console.error('Delete user error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

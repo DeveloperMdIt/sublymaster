@@ -295,34 +295,88 @@ const AdminDashboard = () => {
             case 'users':
                 return (
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Benutzerverwaltung</h2>
-                        <div className="bg-white shadow rounded-lg overflow-hidden">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rolle</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktion</th>
+                        <h2 className="text-xl font-bold mb-4">Benutzerverwaltung</h2>
+                        <div className="bg-white rounded shadow overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-100 border-b">
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Name</th>
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Email</th>
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Plan</th>
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Rolle</th>
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Status</th>
+                                        <th className="p-3 text-sm font-semibold text-gray-600">Aktion</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody>
                                     {users.map(u => (
-                                        <tr key={u.id}>
-                                            <td className="px-6 py-4 text-sm font-medium">{u.email}</td>
-                                            <td className="px-6 py-4 text-sm"><span className={`px-2 rounded-full text-xs font-bold ${u.plan_id > 1 ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>{u.plan_id > 1 ? 'PRO' : 'Free'}</span></td>
-                                            <td className="px-6 py-4 text-sm">{u.role}</td>
-                                            <td className="px-6 py-4 text-sm flex gap-2">
+                                        <tr key={u.id} className="border-b hover:bg-gray-50">
+                                            <td className="p-3 text-sm">
+                                                {u.last_name || u.first_name ? `${u.first_name || ''} ${u.last_name || ''}` : <span className="text-gray-400 italic">Kein Name</span>}
+                                            </td>
+                                            <td className="p-3 text-sm">{u.email}</td>
+                                            <td className="p-3 text-sm">
+                                                <span className={`px-2 py-1 rounded text-xs ${u.plan_id > 1 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
+                                                    {u.plan_name || 'Free'}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-sm uppercase text-xs font-bold text-gray-500">{u.role}</td>
+                                            <td className="p-3 text-sm">
+                                                <span className={`px-2 py-1 rounded text-xs ${u.account_status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                    {u.account_status || 'active'}
+                                                </span>
+                                            </td>
+                                            <td className="p-3 text-sm flex gap-2">
                                                 <button onClick={() => {
                                                     setEditingUser(u);
                                                     setEditForm({ role: u.role, plan_id: u.plan_id, account_status: u.account_status || 'active' });
-                                                }} className="text-indigo-600 hover:text-indigo-900 font-medium">Bearbeiten</button>
-                                                <button onClick={() => handleDeleteUser(u)} className="text-red-600 hover:text-red-900 font-medium ml-2">Löschen</button>
+                                                }} className="text-indigo-600 hover:text-indigo-800">Bearbeiten</button>
+
+                                                {u.account_status !== 'inactive' ? (
+                                                    <button onClick={async () => {
+                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'PUT', body: JSON.stringify({ account_status: 'inactive' }) });
+                                                        if (res && res.ok) {
+                                                            showNotify('User deaktiviert');
+                                                            setUsers(users.map(user => user.id === u.id ? { ...user, account_status: 'inactive' } : user));
+                                                        } else {
+                                                            showNotify('Fehler beim Deaktivieren', 'error');
+                                                        }
+                                                    }} className="text-orange-600 hover:text-orange-800" title="Deaktivieren">
+                                                        Deaktivieren
+                                                    </button>
+                                                ) : (
+                                                    <button onClick={async () => {
+                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'PUT', body: JSON.stringify({ account_status: 'active' }) });
+                                                        if (res && res.ok) {
+                                                            showNotify('User aktiviert');
+                                                            setUsers(users.map(user => user.id === u.id ? { ...user, account_status: 'active' } : user));
+                                                        } else {
+                                                            showNotify('Fehler beim Aktivieren', 'error');
+                                                        }
+                                                    }} className="text-green-600 hover:text-green-800" title="Aktivieren">
+                                                        Aktivieren
+                                                    </button>
+                                                )}
+
+                                                <button onClick={async () => {
+                                                    if (window.confirm('User wirklich löschen? Dies kann nicht rückgängig gemacht werden!')) {
+                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'DELETE' });
+                                                        if (res && res.ok) {
+                                                            showNotify('User gelöscht');
+                                                            setUsers(users.filter(user => user.id !== u.id));
+                                                        } else {
+                                                            showNotify('Fehler beim Löschen', 'error');
+                                                        }
+                                                    }
+                                                }} className="text-red-600 hover:text-red-800">
+                                                    Löschen
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
+                            {users.length === 0 && <div className="p-4 text-center text-gray-500">Keine Benutzer gefunden.</div>}
                         </div>
                     </div>
                 );

@@ -17,16 +17,35 @@ import { Logo } from './components/Logo';
 import './App.css';
 
 // Helper to hide header on editor if needed, or customize it
+import { User, Settings, Crown, CreditCard } from 'lucide-react';
+
 const Navigation = () => {
   const location = useLocation();
   const isEditor = location.pathname === '/editor';
   const { user, logout } = useAuth();
 
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    const name = user.first_name;
+    if (!name) return user.email;
+    if (h < 11) return `Guten Morgen, ${name}`;
+    if (h < 18) return `Guten Tag, ${name}`;
+    return `Guten Abend, ${name}`;
+  };
+
+  const getPlanLabel = () => {
+    if (!user) return null;
+    // Plan Logic: 1=Free, 2=Pro, 3=Business/Credits
+    if (user.plan_id === 1) return `Free Plan (${user.credits || 0})`;
+    if (user.plan_id === 2) return 'Pro Plan';
+    if (user.plan_id === 3) return `Credits Pak (${user.credits})`;
+    return 'Free Plan';
+  };
+
   return (
     <header className={`text-white p-4 shadow-md ${isEditor ? 'bg-slate-900' : 'bg-slate-900'}`}>
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 w-48 hover:opacity-90 transition-opacity">
-          {/* Das Logo ist hier automatisch transparent und der Text wird weiß */}
           <Logo className="text-white" />
         </Link>
         <nav className="flex gap-4 text-sm font-medium items-center">
@@ -39,20 +58,19 @@ const Navigation = () => {
               )}
 
               <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-600">
-                <div className="text-gray-300">
-                  <Link to="/profile" className="font-semibold hover:text-white transition-colors">{user.email}</Link>
-                  {user.subscription && (
-                    <span className="ml-2 text-xs bg-indigo-600 px-2 py-1 rounded">
-                      {user.subscription.plan}
-                    </span>
-                  )}
-                  {user.credits !== undefined && (
-                    <span className="ml-2 text-xs text-gray-400">
-                      {user.credits} Credits
-                    </span>
-                  )}
+                <div className="text-gray-300 flex flex-col items-end">
+                  <span className="font-semibold">{getGreeting()}</span>
+                  <div className="flex items-center gap-1 text-xs text-indigo-400">
+                    {user.plan_id > 1 ? <Crown size={12} /> : <CreditCard size={12} />}
+                    {getPlanLabel()}
+                  </div>
                 </div>
-                <button onClick={logout} className="hover:text-red-300">Logout</button>
+
+                <Link to="/profile" className="p-2 hover:bg-gray-800 rounded-full transition-colors" title="Einstellungen">
+                  <Settings size={20} className="text-gray-400 hover:text-white" />
+                </Link>
+
+                <button onClick={logout} className="hover:text-red-300 text-xs ml-2">Logout</button>
               </div>
             </>
           ) : (
