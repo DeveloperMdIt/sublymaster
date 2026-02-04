@@ -497,6 +497,25 @@ app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
     }
 });
 
+// Test Stripe Connection
+app.post('/api/admin/test-stripe', authenticateAdmin, async (req, res) => {
+    const { stripeSecretKey } = req.body;
+    
+    if (!stripeSecretKey || !stripeSecretKey.startsWith('sk_')) {
+        return res.status(400).json({ success: false, error: 'Ungültiger Secret Key (muss mit sk_ beginnen)' });
+    }
+
+    try {
+        const stripe = require('stripe')(stripeSecretKey);
+        // Try to fetch balance as a test
+        await stripe.balance.retrieve();
+        res.json({ success: true, message: 'Verbindung erfolgreich!' });
+    } catch (err) {
+        console.error('Stripe test error:', err.message);
+        res.json({ success: false, error: err.message });
+    }
+});
+
 // Get subscription plans
 app.get('/api/admin/plans', authenticateAdmin, async (req, res) => {
     try {
