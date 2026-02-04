@@ -187,7 +187,7 @@ export default function UserProfile() {
                 <form onSubmit={handleSaveProfile} className="space-y-8">
                     <div className="grid grid-cols-12 gap-6 items-start">
                         {/* LINKS (2/3) */}
-                        <section className="col-span-12 md:col-span-8">
+                        <section className="col-span-12 sm:col-span-8">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
@@ -198,7 +198,7 @@ export default function UserProfile() {
 
                                 <div className="grid grid-cols-12 gap-4">
                                     {/* Anrede */}
-                                    <div className="col-span-12 md:col-span-3">
+                                    <div className="col-span-6 sm:col-span-3">
                                         <select
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                                             value={profile.salutation || ''}
@@ -212,7 +212,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* Vorname */}
-                                    <div className="col-span-12 md:col-span-4">
+                                    <div className="col-span-12 sm:col-span-4">
                                         <input
                                             type="text"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
@@ -223,7 +223,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* Nachname */}
-                                    <div className="col-span-12 md:col-span-5">
+                                    <div className="col-span-12 sm:col-span-5">
                                         <input
                                             type="text"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
@@ -234,7 +234,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* Straße */}
-                                    <div className="col-span-12 md:col-span-9">
+                                    <div className="col-span-12 sm:col-span-9">
                                         <div className="relative">
                                             <MapPin className="absolute left-3 top-2 text-gray-400" size={14} />
                                             <input
@@ -248,7 +248,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* Hausnummer */}
-                                    <div className="col-span-12 md:col-span-3">
+                                    <div className="col-span-12 sm:col-span-3">
                                         <input
                                             type="text"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
@@ -259,7 +259,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* PLZ */}
-                                    <div className="col-span-12 md:col-span-3">
+                                    <div className="col-span-12 sm:col-span-3">
                                         <input
                                             type="text"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
@@ -270,7 +270,7 @@ export default function UserProfile() {
                                     </div>
 
                                     {/* Ort */}
-                                    <div className="col-span-12 md:col-span-9">
+                                    <div className="col-span-12 sm:col-span-9">
                                         <input
                                             type="text"
                                             className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-bold text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
@@ -323,7 +323,7 @@ export default function UserProfile() {
                         </section>
 
                         {/* RECHTS (1/3) */}
-                        <aside className="col-span-12 md:col-span-4 space-y-6">
+                        <aside className="col-span-12 sm:col-span-4 space-y-6">
                             <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-xl shadow-gray-200/50 overflow-hidden">
                                 <div className="mb-6 flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-lg bg-indigo-600/10 flex items-center justify-center text-indigo-600">
