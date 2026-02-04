@@ -197,13 +197,12 @@ export default function UserProfile() {
                                     <h2 className="text-xl font-extrabold text-gray-900">Persönliche Daten & Anschrift</h2>
                                 </div>
                                 <div className="p-8 space-y-8">
-                                    {/* ROW 1: Anrede (Soll 10 Zeichen breit sein) */}
+                                    {/* ROW 1: Anrede */}
                                     <div className="flex flex-col">
-                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Anrede</label>
                                         <div className="w-[140px]">
-                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium"
+                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-bold text-gray-900"
                                                 value={profile.salutation || ''} onChange={e => setProfile({ ...profile, salutation: e.target.value })}>
-                                                <option value="">Wählen</option>
+                                                <option value="" disabled>ANREDE</option>
                                                 <option value="Herr">Herr</option>
                                                 <option value="Frau">Frau</option>
                                                 <option value="Divers">Divers</option>
@@ -214,58 +213,51 @@ export default function UserProfile() {
                                     {/* ROW 2: Vorname & Name */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Vorname</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.first_name || ''} onChange={e => setProfile({ ...profile, first_name: e.target.value })}
                                                 placeholder="Vorname" />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Nachname</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.last_name || ''} onChange={e => setProfile({ ...profile, last_name: e.target.value })}
                                                 placeholder="Nachname" />
                                         </div>
                                     </div>
 
-                                    {/* ROW 3: Straße & Hausnummer (Hausnr max 10 chars) */}
+                                    {/* ROW 3: Straße & Hausnummer */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                                         <div className="md:col-span-9">
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Straße</label>
                                             <div className="relative">
-                                                <MapPin className="absolute left-4 top-3.5 text-gray-300" size={18} />
-                                                <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                                <MapPin className="absolute left-4 top-4 text-gray-300" size={18} />
+                                                <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                     value={profile.street || ''} onChange={e => setProfile({ ...profile, street: e.target.value })}
-                                                    placeholder="Hauptstraße" />
+                                                    placeholder="Strasse" />
                                             </div>
                                         </div>
                                         <div className="md:col-span-3">
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Hausnummer</label>
-                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.house_number || ''} onChange={e => setProfile({ ...profile, house_number: e.target.value })}
-                                                placeholder="1A" />
+                                                placeholder="Hausnummer" />
                                         </div>
                                     </div>
 
-                                    {/* ROW 4: PLZ & Ort (PLZ max 10 chars) */}
+                                    {/* ROW 4: PLZ & Ort */}
                                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                                         <div className="md:col-span-4">
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">PLZ</label>
-                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" maxLength={10} className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.zip || ''} onChange={e => setProfile({ ...profile, zip: e.target.value })}
-                                                placeholder="12345" />
+                                                placeholder="PLZ" />
                                         </div>
                                         <div className="md:col-span-8">
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Ort</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.city || ''} onChange={e => setProfile({ ...profile, city: e.target.value })}
-                                                placeholder="Stadt" />
+                                                placeholder="Ort" />
                                         </div>
                                     </div>
 
-                                    {/* ROW 5: Land (Deutschland zuerst) */}
+                                    {/* ROW 5: Land */}
                                     <div className="flex flex-col">
-                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Land</label>
-                                        <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                        <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 transition-all"
                                             value={profile.country || 'Deutschland'} onChange={e => setProfile({ ...profile, country: e.target.value })}>
                                             {countries.map(c => <option key={c} value={c}>{c}</option>)}
                                         </select>
@@ -273,23 +265,21 @@ export default function UserProfile() {
 
                                     {/* ROW 6: Telefon */}
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Telefon</label>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-3.5 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                            <Phone className="absolute left-4 top-4 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.phone || ''} onChange={e => setProfile({ ...profile, phone: e.target.value })}
-                                                placeholder="+49 (0) ..." />
+                                                placeholder="Telefon" />
                                         </div>
                                     </div>
 
                                     {/* ROW 7: Mobil */}
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Mobil</label>
                                         <div className="relative">
-                                            <Phone className="absolute left-4 top-3.5 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                            <Phone className="absolute left-4 top-4 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.mobile || ''} onChange={e => setProfile({ ...profile, mobile: e.target.value })}
-                                                placeholder="+49 (1) ..." />
+                                                placeholder="Mobil" />
                                         </div>
                                     </div>
                                 </div>
@@ -308,30 +298,27 @@ export default function UserProfile() {
                                 <div className="p-8 space-y-8">
                                     {/* ROW 1: Firmenname */}
                                     <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Firmenname <span className="text-gray-300 font-normal normal-case italic">(Optional)</span></label>
                                         <div className="relative">
-                                            <Building className="absolute left-4 top-3.5 text-gray-300" size={18} />
-                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border pr-4 font-medium transition-all"
+                                            <Building className="absolute left-4 top-4 text-gray-300" size={18} />
+                                            <input type="text" className="w-full border-gray-300 rounded-xl pl-11 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border pr-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.company_name || ''} onChange={e => setProfile({ ...profile, company_name: e.target.value })}
-                                                placeholder="Musterfirma GmbH" />
+                                                placeholder="Firmenname (Optional)" />
                                         </div>
                                     </div>
 
                                     {/* ROW 2: Rechtsform & USt-IdNr side-by-side */}
                                     <div className="grid grid-cols-1 gap-6">
                                         <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Rechtsform</label>
-                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <select className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 transition-all"
                                                 value={profile.legal_form || ''} onChange={e => setProfile({ ...profile, legal_form: e.target.value })}>
-                                                <option value="">Wählen</option>
+                                                <option value="" disabled>RECHTSFORM</option>
                                                 {legalForms.map(f => <option key={f} value={f}>{f}</option>)}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">USt-IdNr.</label>
-                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-3 border px-4 font-medium transition-all"
+                                            <input type="text" className="w-full border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 py-4 border px-6 font-bold text-gray-900 placeholder:text-gray-400 placeholder:font-bold placeholder:uppercase placeholder:text-xs"
                                                 value={profile.vat_id || ''} onChange={e => setProfile({ ...profile, vat_id: e.target.value })}
-                                                placeholder="DE123456789" />
+                                                placeholder="USt-IdNr." />
                                         </div>
                                     </div>
                                 </div>
