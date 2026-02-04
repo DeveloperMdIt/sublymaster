@@ -20,8 +20,34 @@ const db = new Database(DATABASE_URL);
         await db.query('SELECT NOW()');
         console.log('✅ Connected to PostgreSQL database.');
         console.log('📊 Database URL:', DATABASE_URL.replace(/:[^:@]+@/, ':****@')); // Hide password
+
+        // --- AUTO-MIGRATION (Self-Healing Schema) ---
+        console.log('🔄 Checking database schema...');
+        
+        // 1. Extend user_profiles
+        await db.run('ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS legal_form VARCHAR(50)');
+        
+        // 2. Extend users
+        const userColumns = [
+            ['role', 'VARCHAR(20) DEFAULT \'user\''],
+            ['plan_id', 'INTEGER DEFAULT 1'],
+            ['credits', 'INTEGER DEFAULT 0'],
+            ['account_status', 'VARCHAR(20) DEFAULT \'active\''],
+            ['printer_model', 'VARCHAR(100)'],
+            ['default_offset', 'INTEGER DEFAULT 0']
+        ];
+
+        for (const [col, type] of userColumns) {
+            await db.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${type}`);
+        }
+
+        // 3. Fix data for existing users
+        await db.run("UPDATE users SET role = 'user' WHERE role IS NULL");
+        await db.run("UPDATE users SET account_status = 'active' WHERE account_status IS NULL");
+        
+        console.log('✅ Database schema is up to date.');
     } catch (err) {
-        console.error('❌ Error connecting to database:', err.message);
+        console.error('❌ Error connecting to database or running auto-migration:', err.message);
         process.exit(1);
     }
 })();
@@ -232,7 +258,7 @@ app.get('/api/user/profile', authenticateToken, async (req, res) => {
         const user = await db.getOne(`
             SELECT u.id, u.email, u.role, u.plan_id, u.credits, u.printer_model, u.default_offset, u.account_status,
                    u.customer_number, u.public_id, u.is_verified,
-                   p.salutation, p.first_name, p.last_name, p.company_name, p.vat_id, p.phone, p.mobile
+                   p.salutation, p.first_name, p.last_name, p.company_name, p.vat_id, p.phone, p.mobile, p.legal_form
             FROM users u
             LEFT JOIN user_profiles p ON u.id = p.user_id
             WHERE u.id = $1
