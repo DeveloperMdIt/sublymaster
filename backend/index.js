@@ -462,7 +462,27 @@ app.get('/api/admin/settings', authenticateAdmin, async (req, res) => {
     }
 });
 
-// Update admin settings
+// Update admin settings (POST for compatibility)
+app.post('/api/admin/settings', authenticateAdmin, async (req, res) => {
+    try {
+        const settings = req.body; // { stripePublicKey: '...', stripeSecretKey: '...', stripeSandboxPublicKey: '...', etc. }
+        
+        // Update each setting
+        for (const [key, value] of Object.entries(settings)) {
+            await db.run(
+                'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
+                [key, value]
+            );
+        }
+        
+        res.json({ success: true, message: 'Settings updated' });
+    } catch (err) {
+        console.error('Update settings error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update admin settings (PUT - legacy support)
 app.put('/api/admin/settings', authenticateAdmin, async (req, res) => {
     const { key, value } = req.body;
     try {

@@ -20,7 +20,13 @@ const AdminDashboard = () => {
     const [notification, setNotification] = useState(null);
 
     // Settings State
-    const [settings, setSettings] = useState({ stripePublicKey: '', stripeSecretKey: '' });
+    const [settings, setSettings] = useState({
+        stripePublicKey: '',
+        stripeSecretKey: '',
+        stripeSandboxPublicKey: '',
+        stripeSandboxSecretKey: '',
+        stripeLiveMode: false
+    });
     const [isSaving, setIsSaving] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
 
@@ -169,9 +175,10 @@ const AdminDashboard = () => {
     const handleTestStripe = async () => {
         setIsTesting(true);
         try {
+            const secretKey = settings.stripeLiveMode ? settings.stripeSecretKey : settings.stripeSandboxSecretKey;
             const res = await fetchWithAuth('/api/admin/test-stripe', {
                 method: 'POST',
-                body: JSON.stringify({ stripeSecretKey: settings.stripeSecretKey })
+                body: JSON.stringify({ stripeSecretKey: secretKey })
             });
             if (!res) return;
 
@@ -322,14 +329,77 @@ const AdminDashboard = () => {
             case 'settings':
                 return (
                     <div className="max-w-2xl bg-white p-6 rounded-lg shadow border border-gray-200">
-                        <h3 className="text-lg font-bold mb-4 flex items-center gap-2"><CreditCard size={20} /> Stripe Einstellungen</h3>
-                        <div className="space-y-4">
-                            <div><label className="block text-sm font-medium mb-1">Public Key</label><input type="text" className="w-full border p-2 rounded" value={settings.stripePublicKey} onChange={e => setSettings({ ...settings, stripePublicKey: e.target.value })} /></div>
-                            <div><label className="block text-sm font-medium mb-1">Secret Key</label><input type="password" className="w-full border p-2 rounded" value={settings.stripeSecretKey} onChange={e => setSettings({ ...settings, stripeSecretKey: e.target.value })} /></div>
-                            <div className="flex gap-4 pt-2">
-                                <button onClick={handleTestStripe} disabled={isTesting} className="flex-1 border border-indigo-600 text-indigo-600 py-2 rounded hover:bg-indigo-50">{isTesting ? 'Teste...' : 'Testen'}</button>
-                                <button onClick={handleSaveSettings} disabled={isSaving} className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">{isSaving ? 'Speichere...' : 'Speichern'}</button>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold flex items-center gap-2"><CreditCard size={20} /> Stripe Einstellungen</h3>
+                            <div className="flex items-center gap-2">
+                                <span className={`text-sm font-medium ${!settings.stripeLiveMode ? 'text-green-600' : 'text-gray-500'}`}>Sandbox</span>
+                                <button
+                                    onClick={() => setSettings({ ...settings, stripeLiveMode: !settings.stripeLiveMode })}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.stripeLiveMode ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.stripeLiveMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                                <span className={`text-sm font-medium ${settings.stripeLiveMode ? 'text-indigo-600' : 'text-gray-500'}`}>Live</span>
                             </div>
+                        </div>
+
+                        {settings.stripeLiveMode ? (
+                            <div className="space-y-4 border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-50/50">
+                                <h4 className="font-semibold text-indigo-800">Live Keys</h4>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Live Public Key</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="pk_live_..."
+                                        value={settings.stripePublicKey || ''}
+                                        onChange={e => setSettings({ ...settings, stripePublicKey: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Live Secret Key</label>
+                                    <input
+                                        type="password"
+                                        className="w-full border p-2 rounded focus:ring-indigo-500 focus:border-indigo-500"
+                                        placeholder="sk_live_..."
+                                        value={settings.stripeSecretKey || ''}
+                                        onChange={e => setSettings({ ...settings, stripeSecretKey: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4 border-l-4 border-green-500 pl-4 py-2 bg-green-50/50">
+                                <h4 className="font-semibold text-green-800">Sandbox Keys</h4>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Sandbox Public Key</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border p-2 rounded focus:ring-green-500 focus:border-green-500"
+                                        placeholder="pk_test_..."
+                                        value={settings.stripeSandboxPublicKey || ''}
+                                        onChange={e => setSettings({ ...settings, stripeSandboxPublicKey: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Sandbox Secret Key</label>
+                                    <input
+                                        type="password"
+                                        className="w-full border p-2 rounded focus:ring-green-500 focus:border-green-500"
+                                        placeholder="sk_test_..."
+                                        value={settings.stripeSandboxSecretKey || ''}
+                                        onChange={e => setSettings({ ...settings, stripeSandboxSecretKey: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-4 pt-6">
+                            <button onClick={handleTestStripe} disabled={isTesting} className="flex-1 border border-indigo-600 text-indigo-600 py-2 rounded hover:bg-indigo-50 transition-colors">
+                                {isTesting ? 'Teste...' : 'Verbindung Testen'}
+                            </button>
+                            <button onClick={handleSaveSettings} disabled={isSaving} className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition-colors">
+                                {isSaving ? 'Speichere...' : 'Speichern'}
+                            </button>
                         </div>
                     </div>
                 );
