@@ -321,8 +321,15 @@ app.put('/api/user/profile', authenticateToken, async (req, res) => {
 
         res.json({ success: true, message: 'Profile updated' });
     } catch (err) {
-        console.error('Update profile error:', err);
-        res.status(500).json({ error: 'Server error' });
+        console.error('CRITICAL: Update profile error!');
+        console.error('Request Body:', JSON.stringify(req.body, null, 2));
+        console.error('Error Stack:', err.stack);
+        console.error('Error Message:', err.message);
+        res.status(500).json({ 
+            error: 'Server error', 
+            details: err.message,
+            code: err.code 
+        });
     }
 });
 

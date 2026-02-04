@@ -113,7 +113,9 @@ export default function UserProfile() {
             login({ ...storedUser, first_name: profile.first_name }, token);
             fetchProfile();
         } else {
-            showNotify('Fehler beim Speichern', 'error');
+            const errorData = await res.json().catch(() => ({}));
+            console.error('Profile Save Failed Details:', errorData);
+            showNotify(`Fehler: ${errorData.details || errorData.error || 'Serverfehler'}`, 'error');
         }
         setIsSaving(false);
     };
