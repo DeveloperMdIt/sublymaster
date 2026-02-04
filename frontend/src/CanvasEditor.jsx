@@ -1125,7 +1125,13 @@ const CanvasEditor = () => {
                         })}
                     </div>
 
-                    <div className="border border-gray-300 shadow-xl relative bg-white">
+                    <div
+                        className="border border-gray-300 shadow-xl relative bg-white overflow-auto"
+                        style={{
+                            maxWidth: '100%',
+                            maxHeight: '80vh'
+                        }}
+                    >
                         <canvas ref={canvasRef} />
                     </div>
                 </div>
