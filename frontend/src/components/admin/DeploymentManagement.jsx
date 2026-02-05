@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 
 export default function DeploymentManagement() {
     const [deployments, setDeployments] = useState([]);
@@ -15,7 +16,7 @@ export default function DeploymentManagement() {
     const loadDeployments = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/admin/deployments', {
+            const response = await fetch(API_ENDPOINTS.admin.deployments, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -35,7 +36,7 @@ export default function DeploymentManagement() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/admin/deploy', {
+            const response = await fetch(API_ENDPOINTS.admin.deploy, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

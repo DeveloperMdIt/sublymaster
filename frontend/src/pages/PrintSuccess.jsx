@@ -40,7 +40,7 @@ const PrintSuccess = () => {
                     </Link>
 
                     <Link
-                        to="/dashboard"
+                        to="/dashboard/history"
                         className="bg-white border text-gray-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition border-gray-200 flex items-center justify-center gap-2"
                     >
                         <History size={18} />

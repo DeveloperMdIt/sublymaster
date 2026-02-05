@@ -7,20 +7,32 @@ export const AuthProvider = ({ children }) => {
     // Atomic initialization from localStorage
     const [token, setToken] = useState(() => {
         const t = localStorage.getItem('token');
-        console.log('🧪 Auth Bootstrap [Token]:', t ? (t.substring(0, 10) + '...') : 'MISSING');
+        // Critical Fix: Check for invalid string representations of falsy values
+        if (!t || t === 'false' || t === 'undefined' || t === 'null' || t === 'null' || t === '') {
+            if (t && t !== '') console.warn('🧪 Auth Bootstrap [Token]: Detected invalid string value:', t);
+            else console.log('🧪 Auth Bootstrap [Token]: MISSING');
+            return null;
+        }
+        console.log('🧪 Auth Bootstrap [Token]:', t.substring(0, 10) + '...');
         return t;
     });
 
     const [user, setUser] = useState(() => {
         try {
             const u = localStorage.getItem('user');
-            // Atomic check: If no token, we can't have a user
-            if (!localStorage.getItem('token')) {
-                console.log('🧪 Auth Bootstrap [User]: Force MISSING because Token is missing');
+            const t = localStorage.getItem('token');
+            // Atomic check: If no valid token, we MUST not have a user
+            if (!t || t === 'false' || t === 'undefined' || t === 'null' || t === '') {
+                console.log('🧪 Auth Bootstrap [User]: Force MISSING because Token is missing/invalid');
                 return null;
             }
-            console.log('🧪 Auth Bootstrap [User]:', u ? JSON.parse(u).email : 'MISSING');
-            return u ? JSON.parse(u) : null;
+            if (!u || u === 'undefined' || u === 'null') {
+                console.log('🧪 Auth Bootstrap [User]: MISSING (Token exists but no user data)');
+                return null;
+            }
+            const parsedUser = JSON.parse(u);
+            console.log('🧪 Auth Bootstrap [User]:', parsedUser?.email || 'MISSING (Parse Error)');
+            return parsedUser;
         } catch (e) {
             console.error('Failed to parse user from localStorage', e);
             return null;
@@ -28,6 +40,34 @@ export const AuthProvider = ({ children }) => {
     });
 
     const [loading, setLoading] = useState(true);
+
+    const login = (userData, authToken) => {
+        setUser(userData);
+        setToken(authToken);
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('user', JSON.stringify(userData));
+    };
+
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+    };
+
+    // Cross-check Effect: If status is inconsistent, purge everything immediately
+    useEffect(() => {
+        if (!loading) {
+            if (token && !user) {
+                console.warn("🧪 Auth Inconsistency: Token exists but no User. Purging...");
+                logout();
+            } else if (!token && user) {
+                console.warn("🧪 Auth Inconsistency: User exists but no Token. Purging...");
+                logout();
+            }
+        }
+    }, [token, user, loading]);
 
     useEffect(() => {
         const initAuth = async () => {
@@ -69,21 +109,6 @@ export const AuthProvider = ({ children }) => {
 
         initAuth();
     }, [token]);
-
-    const login = (userData, authToken) => {
-        setUser(userData);
-        setToken(authToken);
-        localStorage.setItem('token', authToken);
-        localStorage.setItem('user', JSON.stringify(userData));
-    };
-
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-    };
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout, loading }}>

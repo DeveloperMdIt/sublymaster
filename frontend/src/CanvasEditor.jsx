@@ -228,7 +228,7 @@ const CanvasEditor = () => {
         });
 
         try {
-            const res = await fetch('/api/projects', {
+            const res = await fetch(API_ENDPOINTS.projects, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -302,7 +302,7 @@ const CanvasEditor = () => {
 
     const loadProject = async (projectId) => {
         try {
-            const res = await fetch(`/api/projects/${projectId}`, {
+            const res = await fetch(API_ENDPOINTS.projectById(projectId), {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -402,7 +402,7 @@ const CanvasEditor = () => {
         if (!projectToDelete) return;
 
         try {
-            const res = await fetch(`/api/projects/${projectToDelete}`, {
+            const res = await fetch(API_ENDPOINTS.projectById(projectToDelete), {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -449,53 +449,40 @@ const CanvasEditor = () => {
 
     const confirmPrint = () => {
         setShowPreview(false);
-        const canvas = fabricCanvasRef.current;
-        const width = canvas.width;
-        const height = canvas.height;
-
         // Scale 1mm = 4px
         const PX_PER_MM = 4;
+        const currentTemplate = allTemplates[template];
+        const mmW = currentTemplate.width / PX_PER_MM;
+        const mmH = currentTemplate.height / PX_PER_MM;
 
-        let startW = width / PX_PER_MM;
-        let startH = height / PX_PER_MM;
-
-        const needsRotation = startW > startH;
-
-        let finalPageW = startW;
-        let finalPageH = startH;
-
-        if (needsRotation) {
-            finalPageW = startH;
-            finalPageH = startW;
-        }
-
-        // Use the generated preview image or regen (regen is safer for closure context if needed, but we have dataUrl in args if passed? 
-        // actually easier to Regen or use state. Let's regen to be safe/clean code, or just use state.)
-        // We'll regen or pass it.
+        // Use the generated preview image
         const dataUrl = previewImage;
 
-        const offsetTop = printOffset;
+        // Determine if we should rotate (if width > height, we often print landscape)
+        const isLandscape = mmW > mmH;
 
-        // THE FINAL PRINT FIX ("Der Anker")
+        // Final Page dimensions (Portrait is usually safer for printers, or matching template)
+        // For Sublimation "Mugs" (200x95), we often rotate 90deg to fit "Portrait" paper strips
+        // But for A4, we want A4.
+
         const printWindow = window.open('', '_blank');
         printWindow.document.write(`
             <html>
                 <head>
                     <style>
-                        @page { size: 95mm 200mm; margin: 0; }
+                        @page { size: ${isLandscape ? `${mmH}mm ${mmW}mm` : `${mmW}mm ${mmH}mm`}; margin: 0; }
                         body { 
                             margin: 0; 
                             display: flex; 
                             align-items: center; 
                             justify-content: center; 
-                            height: 200mm; 
-                            width: 95mm; 
+                            height: ${isLandscape ? mmW : mmH}mm; 
+                            width: ${isLandscape ? mmH : mmW}mm; 
                         }
                         img { 
-                            width: 200mm; 
-                            height: 95mm; 
-                            transform: rotate(90deg); 
-                            transform-origin: center; 
+                            width: ${mmW}mm; 
+                            height: ${mmH}mm; 
+                            ${isLandscape ? 'transform: rotate(90deg); transform-origin: center;' : ''}
                         }
                     </style>
                 </head>
@@ -510,7 +497,7 @@ const CanvasEditor = () => {
         const logPrint = async () => {
             if (!token) return;
             try {
-                await fetch('/api/print/log', {
+                await fetch(API_ENDPOINTS.printLog, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({
@@ -541,7 +528,7 @@ const CanvasEditor = () => {
 
         if (token) {
             try {
-                const res = await fetch('/api/templates', {
+                const res = await fetch(API_ENDPOINTS.templates, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

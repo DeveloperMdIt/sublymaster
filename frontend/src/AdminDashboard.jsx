@@ -229,7 +229,7 @@ const AdminDashboard = () => {
 
     const togglePlanStatus = async (plan) => {
         try {
-            const res = await fetchWithAuth(`/api/admin/plans/${plan.id}`, {
+            const res = await fetchWithAuth(API_ENDPOINTS.admin.planById(plan.id), {
                 method: 'PUT',
                 body: JSON.stringify({ ...plan, is_active: plan.is_active ? 0 : 1 })
             });

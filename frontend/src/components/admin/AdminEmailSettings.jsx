@@ -68,7 +68,7 @@ const AdminEmailSettings = ({ token, showNotify }) => {
         if (!selectedTemplate || !testEmail) return;
         setIsTesting(true);
         try {
-            const res = await fetch(API_ENDPOINTS.testEmail, {
+            const res = await fetch(API_ENDPOINTS.admin.testEmail, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

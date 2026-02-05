@@ -34,12 +34,16 @@ export const API_ENDPOINTS = {
         userById: (id) => `${API_BASE_URL}/api/admin/users/${id}`,
         stats: `${API_BASE_URL}/api/admin/stats`,
         settings: `${API_BASE_URL}/api/admin/settings`,
-        testStripe: `${API_BASE_URL}/api/admin/test-stripe`,
         plans: `${API_BASE_URL}/api/admin/plans`,
         planById: (id) => `${API_BASE_URL}/api/admin/plans/${id}`,
+        templates: `${API_BASE_URL}/api/admin/templates`,
+        templateById: (id) => `${API_BASE_URL}/api/admin/templates/${id}`,
+        promoteTemplate: `${API_BASE_URL}/api/admin/templates/promote`,
         emailTemplates: `${API_BASE_URL}/api/admin/email-templates`,
         emailTemplateByType: (type) => `${API_BASE_URL}/api/admin/email-templates/${type}`,
         testEmail: `${API_BASE_URL}/api/admin/email-templates/test`,
+        deploy: `${API_BASE_URL}/api/admin/deploy`,
+        deployments: `${API_BASE_URL}/api/admin/deployments`,
     }
 };
 

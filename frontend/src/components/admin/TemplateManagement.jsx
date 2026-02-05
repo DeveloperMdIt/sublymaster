@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINTS } from '../../config/api';
 
 export default function TemplateManagement() {
     const [standardTemplates, setStandardTemplates] = useState([]);
@@ -15,7 +16,7 @@ export default function TemplateManagement() {
     const loadTemplates = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/admin/templates', {
+            const response = await fetch(API_ENDPOINTS.admin.templates, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await response.json();
@@ -33,7 +34,7 @@ export default function TemplateManagement() {
         }
 
         const token = localStorage.getItem('token');
-        await fetch('/api/admin/templates', {
+        await fetch(API_ENDPOINTS.admin.templates, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -54,7 +55,7 @@ export default function TemplateManagement() {
 
     const updateTemplate = async () => {
         const token = localStorage.getItem('token');
-        await fetch(`/api/admin/templates/${editingTemplate.id}`, {
+        await fetch(API_ENDPOINTS.admin.templateById(editingTemplate.id), {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -76,7 +77,7 @@ export default function TemplateManagement() {
         if (!confirm('Template wirklich löschen?')) return;
 
         const token = localStorage.getItem('token');
-        await fetch(`/api/admin/templates/${id}`, {
+        await fetch(API_ENDPOINTS.admin.templateById(id), {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -90,7 +91,7 @@ export default function TemplateManagement() {
         if (!name) return;
 
         const token = localStorage.getItem('token');
-        await fetch('/api/admin/templates/promote', {
+        await fetch(API_ENDPOINTS.admin.promoteTemplate, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

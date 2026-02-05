@@ -26,6 +26,24 @@ const db = new Database(DATABASE_URL);
         // --- AUTO-MIGRATION (Self-Healing Schema) ---
         console.log('🔄 Checking database schema...');
         
+        // 0. Base Tables
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // 1. Extend user_profiles
         await db.run('ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS legal_form VARCHAR(50)');
         
@@ -102,6 +120,29 @@ const db = new Database(DATABASE_URL);
             `, [t.type, t.name, t.subject, t.body]);
         }
         
+        // 7. Print Logs Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS print_logs (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                file_name VARCHAR(255),
+                format VARCHAR(100),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 8. Printer Feedback Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS printer_feedback (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                printer_model VARCHAR(255),
+                used_offset DECIMAL(10,2),
+                status VARCHAR(50),
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         console.log('✅ Database schema is up to date.');
     } catch (err) {
         console.error('❌ Error during database auto-migration:', err.message);
@@ -1174,6 +1215,48 @@ app.get('/api/history', authenticateToken, async (req, res) => {
     }
 });
 
+// Log a print action
+app.post('/api/print/log', authenticateToken, async (req, res) => {
+    const { fileName, format } = req.body;
+    try {
+        // 1. Check/Decrement Credits (if not admin)
+        const user = await db.getOne('SELECT credits, role, plan_id FROM users WHERE id = $1', [req.user.id]);
+        
+        if (user.role !== 'admin' && user.plan_id !== 2) { // 2 = Pro (Unlimited)
+            if (user.credits <= 0) {
+                return res.status(402).json({ error: 'Zu wenig Credits. Bitte aufladen.' });
+            }
+            await db.run('UPDATE users SET credits = credits - 1 WHERE id = $1', [req.user.id]);
+        }
+
+        // 2. Log entry
+        await db.run(
+            'INSERT INTO print_logs (user_id, file_name, format) VALUES ($1, $2, $3)',
+            [req.user.id, fileName || 'Unbenannt', format || 'Standard']
+        );
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Print log error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Submit printer feedback
+app.post('/api/printer/feedback', authenticateToken, async (req, res) => {
+    const { printerModel, usedOffset, status } = req.body;
+    try {
+        await db.run(
+            'INSERT INTO printer_feedback (user_id, printer_model, used_offset, status) VALUES ($1, $2, $3, $4)',
+            [req.user.id, printerModel, usedOffset, status]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Feedback error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/api/transactions', authenticateToken, async (req, res) => {
     try {
         const transactions = await db.getAll(
@@ -1266,7 +1349,7 @@ app.get('/api/admin/deployments', authenticateAdmin, async (req, res) => {
 });
 
 // Catch-all for API routes (returns JSON instead of HTML)
-app.all('/api/*', (req, res) => {
+app.all(/^\/api\/.*/, (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
 });
 
