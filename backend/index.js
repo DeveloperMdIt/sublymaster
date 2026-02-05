@@ -31,13 +31,9 @@ const db = new Database(DATABASE_URL);
             const idTypeRes = await db.query("SELECT data_type FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'id'");
             if (idTypeRes.rows.length > 0) {
                 console.log('📊 [DIAGNOSTIC] users.id type is:', idTypeRes.rows[0].data_type);
-            } else {
-                console.log('📊 [DIAGNOSTIC] users table does not exist yet.');
             }
-        } catch (e) {
-            console.warn('📊 [DIAGNOSTIC] Could not check users.id type:', e.message);
-        }
-        
+        } catch (e) { console.warn('📊 [DIAGNOSTIC] users.id check failed:', e.message); }
+
         // 0. Base Tables
         await db.run(`
             CREATE TABLE IF NOT EXISTS users (
@@ -48,19 +44,8 @@ const db = new Database(DATABASE_URL);
             )
         `);
 
-        await db.run(`
-            CREATE TABLE IF NOT EXISTS user_profiles (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        // 1. Extend user_profiles
-        await db.run('ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS legal_form VARCHAR(50)');
-        
-        // 2. Extend users
-        const userColumns = [
+        // 1. Column Reconciliation for 'users'
+        const userCols = [
             ['role', 'VARCHAR(20) DEFAULT \'user\''],
             ['plan_id', 'INTEGER DEFAULT 1'],
             ['credits', 'INTEGER DEFAULT 0'],
@@ -68,18 +53,108 @@ const db = new Database(DATABASE_URL);
             ['printer_model', 'VARCHAR(100)'],
             ['default_offset', 'INTEGER DEFAULT 0'],
             ['is_verified', 'BOOLEAN DEFAULT true'],
-            ['verification_token', 'VARCHAR(255)']
+            ['verification_token', 'VARCHAR(255)'],
+            ['customer_number', 'VARCHAR(20) UNIQUE'],
+            ['public_id', 'UUID DEFAULT NULL']
         ];
-
-        for (const [col, type] of userColumns) {
+        for (const [col, type] of userCols) {
             await db.run(`ALTER TABLE users ADD COLUMN IF NOT EXISTS ${col} ${type}`);
         }
 
-        // 3. Fix data for existing users
-        await db.run("UPDATE users SET role = 'user' WHERE role IS NULL");
-        await db.run("UPDATE users SET account_status = 'active' WHERE account_status IS NULL");
+        // 2. User Profiles Table & Columns
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        const profileCols = [
+            ['salutation', 'VARCHAR(20)'],
+            ['first_name', 'VARCHAR(100)'],
+            ['last_name', 'VARCHAR(100)'],
+            ['company_name', 'VARCHAR(150)'],
+            ['vat_id', 'VARCHAR(50)'],
+            ['phone', 'VARCHAR(50)'],
+            ['mobile', 'VARCHAR(50)'],
+            ['legal_form', 'VARCHAR(50)'],
+            ['updated_at', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+        ];
+        for (const [col, type] of profileCols) {
+            await db.run(`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS ${col} ${type}`);
+        }
 
-        // 4. Email Templates Table
+        // 3. Addresses Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS addresses (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(20) NOT NULL,
+                street VARCHAR(150),
+                house_number VARCHAR(20),
+                address_addition VARCHAR(100),
+                zip_code VARCHAR(20),
+                city VARCHAR(100),
+                country VARCHAR(100) DEFAULT 'Deutschland',
+                is_default BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 4. User Activity Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS user_activity (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                action VARCHAR(100) NOT NULL,
+                details TEXT,
+                ip_address VARCHAR(45),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 5. Deployment History Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS deployment_history (
+                id SERIAL PRIMARY KEY,
+                triggered_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                status VARCHAR(50) DEFAULT 'pending',
+                branch VARCHAR(100),
+                commit_hash VARCHAR(100),
+                error_message TEXT,
+                started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                completed_at TIMESTAMP
+            )
+        `);
+
+        // 6. Transactions Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS transactions (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                type VARCHAR(50) NOT NULL,
+                description VARCHAR(255),
+                amount DECIMAL(10,2),
+                credits INTEGER,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 7. Templates Table
+        await db.run(`
+            CREATE TABLE IF NOT EXISTS templates (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                width INTEGER DEFAULT 800,
+                height INTEGER DEFAULT 600,
+                is_standard BOOLEAN DEFAULT false,
+                created_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 8. Email Templates & Queue
         await db.run(`
             CREATE TABLE IF NOT EXISTS email_templates (
                 id SERIAL PRIMARY KEY,
@@ -88,72 +163,23 @@ const db = new Database(DATABASE_URL);
                 subject VARCHAR(200) NOT NULL,
                 body TEXT NOT NULL,
                 enabled BOOLEAN DEFAULT true,
-                send_after_days INTEGER,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-        // 5. Email Queue Table
-        await db.run(`
-            CREATE TABLE IF NOT EXISTS email_queue (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                template_type VARCHAR(50),
-                scheduled_for TIMESTAMP NOT NULL,
-                sent_at TIMESTAMP,
-                status VARCHAR(20) DEFAULT 'pending',
-                error_message TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-
-        // 6. Seed Default Templates
+        // Seed Default Templates
         const templates = [
-            {
-                type: 'registration',
-                name: 'Registrierungsbestätigung',
-                subject: 'Bitte bestätigen Sie Ihre Email-Adresse',
-                body: 'Hallo,\n\nvielen Dank für Ihre Registrierung bei SublyMaster!\n\nBitte bestätigen Sie Ihre Email-Adresse durch Klick auf den folgenden Link:\n{{verificationLink}}\n\nViele Grüße,\nIhr SublyMaster Team'
-            },
-            {
-                type: 'welcome',
-                name: 'Willkommensmail',
-                subject: 'Willkommen bei SublyMaster!',
-                body: 'Hallo,\n\nwillkommen bei SublyMaster! Ihr Konto wurde erfolgreich aktiviert.\n\nViel Spaß beim Designen!\n\nIhr SublyMaster Team'
-            }
+            { type: 'registration', name: 'Registrierungsbestätigung', subject: 'Bitte bestätigen Sie Ihre Email-Adresse', body: 'Hallo,\n\nvielen Dank für Ihre Registrierung bei SublyMaster!\n\nBitte bestätigen Sie Ihre Email-Adresse durch Klick auf den folgenden Link:\n{{verificationLink}}\n\nViele Grüße,\nIhr SublyMaster Team' },
+            { type: 'welcome', name: 'Willkommensmail', subject: 'Willkommen bei SublyMaster!', body: 'Hallo,\n\nwillkommen bei SublyMaster! Ihr Konto wurde erfolgreich aktiviert.\n\nViel Spaß beim Designen!\n\nIhr SublyMaster Team' }
         ];
-
         for (const t of templates) {
-            await db.run(`
-                INSERT INTO email_templates (type, name, subject, body)
-                VALUES ($1, $2, $3, $4)
-                ON CONFLICT (type) DO NOTHING
-            `, [t.type, t.name, t.subject, t.body]);
+            await db.run('INSERT INTO email_templates (type, name, subject, body) VALUES ($1, $2, $3, $4) ON CONFLICT (type) DO NOTHING', [t.type, t.name, t.subject, t.body]);
         }
-        
-        // 7. Print Logs Table
-        await db.run(`
-            CREATE TABLE IF NOT EXISTS print_logs (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                file_name VARCHAR(255),
-                format VARCHAR(100),
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
 
-        // 8. Printer Feedback Table
-        await db.run(`
-            CREATE TABLE IF NOT EXISTS printer_feedback (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-                printer_model VARCHAR(255),
-                used_offset DECIMAL(10,2),
-                status VARCHAR(50),
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
+        // 9. Fix existing data inconsistencies
+        await db.run("UPDATE users SET role = 'user' WHERE role IS NULL");
+        await db.run("UPDATE users SET account_status = 'active' WHERE account_status IS NULL");
 
         console.log('✅ Database schema is up to date.');
     } catch (err) {
