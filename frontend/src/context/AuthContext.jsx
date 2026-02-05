@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import { API_ENDPOINTS } from '../config/api';
 
 const AuthContext = createContext(null);
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
 
                 // Then fetch fresh data from backend to ensure sync (credits, plan, names)
                 try {
-                    const res = await fetch('/api/user/profile', {
+                    const res = await fetch(API_ENDPOINTS.userProfile, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (res.ok) {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as fabric from 'fabric';
 import { useAuth } from './context/AuthContext';
+import { API_ENDPOINTS } from './config/api';
 import Modal from './components/Modal';
 import Toast from './components/Toast';
 import PrintPreview from './components/PrintPreview';
@@ -89,7 +90,7 @@ const CanvasEditor = () => {
     useEffect(() => {
         if (token) {
             // Load templates
-            fetch('/api/templates', {
+            fetch(API_ENDPOINTS.templates, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
@@ -150,7 +151,7 @@ const CanvasEditor = () => {
 
     const loadProjects = () => {
         if (!token) return;
-        fetch('/api/projects', {
+        fetch(API_ENDPOINTS.projects, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -169,7 +170,7 @@ const CanvasEditor = () => {
     // Load User Settings (Offset)
     useEffect(() => {
         if (token) {
-            fetch('/api/settings', {
+            fetch(API_ENDPOINTS.settings, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
                 .then(res => res.json())
