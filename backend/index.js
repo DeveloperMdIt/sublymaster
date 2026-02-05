@@ -1401,7 +1401,7 @@ app.get('/api/admin/deployments', authenticateAdmin, async (req, res) => {
 });
 
 // Catch-all for API routes (returns JSON instead of HTML)
-app.all(/^\/api\/.*/, (req, res) => {
+app.all('/api/:splat*', (req, res) => {
     res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
 });
 
