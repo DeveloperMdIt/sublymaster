@@ -157,12 +157,12 @@ const sendEmail = async (to, templateType, data) => {
         const subject = replacePlaceholders(template.subject, data);
         const body = replacePlaceholders(template.body, data);
 
-        // Map environment variables (supporting both SMTP_ and MAIL_ prefixes)
-        const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
-        const port = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || 587);
-        const user = process.env.SMTP_USER || process.env.MAIL_USERNAME;
-        const pass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
-        const from = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || 'noreply@sublymaster.de';
+        // Map environment variables (supporting multiple prefixes)
+        const host = process.env.SMTP_HOST || process.env.MAIL_HOST || process.env.EMAIL_SMTP_HOST;
+        const port = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || process.env.EMAIL_SMTP_PORT || 587);
+        const user = process.env.SMTP_USER || process.env.MAIL_USERNAME || process.env.EMAIL_SMTP_USER;
+        const pass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD || process.env.EMAIL_SMTP_PASS;
+        const from = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || process.env.EMAIL_SMTP_FROM || 'noreply@sublymaster.de';
         
         // Determine secure setting: true for port 465, false for 587 (STARTTLS)
         // Or explicitly if SMTP_SECURE is true or MAIL_ENCRYPTION is ssl

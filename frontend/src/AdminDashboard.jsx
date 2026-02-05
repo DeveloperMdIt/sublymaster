@@ -50,7 +50,9 @@ const AdminDashboard = () => {
     // Initial Load
     useEffect(() => {
         if (!user || user.role !== 'admin') {
-            // navigate('/'); // Uncomment for strict protection
+            // If not admin or not logged in, stop loading so we don't hang
+            setLoading(false);
+            return;
         }
 
         if (token) {
@@ -80,6 +82,8 @@ const AdminDashboard = () => {
                     showNotify('Fehler beim Laden der Daten', 'error');
                 })
                 .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, [user, token]);
 
