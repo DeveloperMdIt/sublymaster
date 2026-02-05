@@ -104,8 +104,9 @@ const db = new Database(DATABASE_URL);
         
         console.log('✅ Database schema is up to date.');
     } catch (err) {
-        console.error('❌ Error connecting to database or running auto-migration:', err.message);
-        process.exit(1);
+        console.error('❌ Error during database auto-migration:', err.message);
+        console.log('⚠️ Server will attempt to continue, but some features might be broken.');
+        // Don't process.exit(1) here to allow the server to at least start
     }
 })();
 

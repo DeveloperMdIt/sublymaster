@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Users, LayoutDashboard, CreditCard, Settings, FileText, CheckCircle, AlertCircle, LogOut, X, Mail } from 'lucide-react';
-import Modal from './components/Modal';
+import SMModal from './components/Modal';
 import Toast from './components/Toast';
 import AdminLayout from './components/admin/AdminLayout';
 import PrinterAnalytics from './components/admin/PrinterAnalytics';
@@ -355,7 +355,7 @@ const AdminDashboard = () => {
                         </div>
 
                         {/* Custom Confirm Delete Modal */}
-                        <Modal
+                        <SMModal
                             isOpen={!!confirmDelete}
                             onClose={() => setConfirmDelete(null)}
                             title="Benutzer löschen"
@@ -395,7 +395,7 @@ const AdminDashboard = () => {
                                     Möchtest du den Benutzer <span className="text-gray-900 font-semibold">{confirmDelete?.email}</span> wirklich unwiderruflich löschen? Diese Aktion kann nicht rückgängig gemacht werden.
                                 </p>
                             </div>
-                        </Modal>
+                        </SMModal>
                     </div>
                 );
             case 'settings':
