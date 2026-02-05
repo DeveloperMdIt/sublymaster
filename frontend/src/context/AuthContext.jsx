@@ -14,6 +14,11 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         try {
             const u = localStorage.getItem('user');
+            // Atomic check: If no token, we can't have a user
+            if (!localStorage.getItem('token')) {
+                console.log('🧪 Auth Bootstrap [User]: Force MISSING because Token is missing');
+                return null;
+            }
             console.log('🧪 Auth Bootstrap [User]:', u ? JSON.parse(u).email : 'MISSING');
             return u ? JSON.parse(u) : null;
         } catch (e) {
@@ -36,7 +41,7 @@ export const AuthProvider = ({ children }) => {
                         const data = await res.json();
                         // Merge essential data
                         const updatedUser = {
-                            ...(JSON.parse(storedUser || '{}')),
+                            ...(user || {}),
                             id: data.id,
                             email: data.email,
                             role: data.role,
@@ -82,9 +87,16 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout, loading }}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        console.warn("useAuth used outside of AuthProvider! Returning fallback.");
+        return { user: null, token: null, login: () => { }, logout: () => { }, loading: false };
+    }
+    return context;
+};

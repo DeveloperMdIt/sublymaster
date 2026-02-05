@@ -188,7 +188,7 @@ const CanvasEditor = () => {
             return;
         }
 
-        fetch('/api/user/profile', {
+        fetch(API_ENDPOINTS.userProfile, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ default_offset: offset })

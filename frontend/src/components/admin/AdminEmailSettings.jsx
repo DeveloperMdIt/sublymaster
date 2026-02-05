@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, Save, Send, Eye, Edit3, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import Modal from '../Modal';
+import { API_ENDPOINTS } from '../../config/api';
 
 const AdminEmailSettings = ({ token, showNotify }) => {
     const [templates, setTemplates] = useState([]);
@@ -17,7 +18,7 @@ const AdminEmailSettings = ({ token, showNotify }) => {
     const fetchTemplates = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/admin/email-templates', {
+            const res = await fetch(API_ENDPOINTS.admin.emailTemplates, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -38,7 +39,7 @@ const AdminEmailSettings = ({ token, showNotify }) => {
         if (!selectedTemplate) return;
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/admin/email-templates/${selectedTemplate.type}`, {
+            const res = await fetch(API_ENDPOINTS.admin.emailTemplateByType(selectedTemplate.type), {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -67,7 +68,7 @@ const AdminEmailSettings = ({ token, showNotify }) => {
         if (!selectedTemplate || !testEmail) return;
         setIsTesting(true);
         try {
-            const res = await fetch('/api/admin/email-templates/test', {
+            const res = await fetch(API_ENDPOINTS.testEmail, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

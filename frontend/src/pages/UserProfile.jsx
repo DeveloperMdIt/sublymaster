@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Crown, CreditCard, User, MapPin, Phone, Briefcase, Building, Save, ExternalLink } from 'lucide-react';
 import PlansModal from '../components/PlansModal';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function UserProfile() {
     const { token, logout, login, user } = useAuth();
@@ -56,7 +57,7 @@ export default function UserProfile() {
     };
 
     const fetchProfile = async () => {
-        const res = await fetchWithAuth('/api/user/profile');
+        const res = await fetchWithAuth(API_ENDPOINTS.userProfile);
         if (res && res.ok) {
             const data = await res.json();
 
@@ -102,7 +103,7 @@ export default function UserProfile() {
             country: profile.country
         };
 
-        const res = await fetchWithAuth('/api/user/profile', {
+        const res = await fetchWithAuth(API_ENDPOINTS.userProfile, {
             method: 'PUT',
             body: JSON.stringify(payload)
         });

@@ -1,7 +1,6 @@
 // API Configuration
-// Automatically uses relative URLs in production, localhost in development
-
-const API_BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:3000';
+// Always use relative paths - works with Vite proxy in dev and same-origin in prod
+const API_BASE_URL = '';
 
 export const API_ENDPOINTS = {
     // Auth
@@ -37,6 +36,9 @@ export const API_ENDPOINTS = {
         testStripe: `${API_BASE_URL}/api/admin/test-stripe`,
         plans: `${API_BASE_URL}/api/admin/plans`,
         planById: (id) => `${API_BASE_URL}/api/admin/plans/${id}`,
+        emailTemplates: `${API_BASE_URL}/api/admin/email-templates`,
+        emailTemplateByType: (type) => `${API_BASE_URL}/api/admin/email-templates/${type}`,
+        testEmail: `${API_BASE_URL}/api/admin/email-templates/test`,
     }
 };
 

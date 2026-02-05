@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, LayoutDashboard, CreditCard, Settings, FileText, CheckCircle, AlertCircle, LogOut, X, Mail } from 'lucide-react';
 import SMModal from './components/Modal';
 import Toast from './components/Toast';
+import { API_ENDPOINTS } from './config/api';
 import AdminLayout from './components/admin/AdminLayout';
 import PrinterAnalytics from './components/admin/PrinterAnalytics';
 import TemplateManagement from './components/admin/TemplateManagement';
@@ -59,10 +60,10 @@ const AdminDashboard = () => {
         if (token) {
             setLoading(true);
             Promise.all([
-                fetchWithAuth('/api/admin/users'),
-                fetchWithAuth('/api/admin/stats'),
-                fetchWithAuth('/api/admin/settings'),
-                fetchWithAuth('/api/admin/plans')
+                fetchWithAuth(API_ENDPOINTS.admin.users),
+                fetchWithAuth(API_ENDPOINTS.admin.stats),
+                fetchWithAuth(API_ENDPOINTS.admin.settings),
+                fetchWithAuth(API_ENDPOINTS.admin.plans)
             ])
                 .then(async ([usersRes, statsRes, settingsRes, plansRes]) => {
                     // If any request failed due to auth, logout handles it, and we get null
@@ -117,7 +118,7 @@ const AdminDashboard = () => {
     const handleUpdateUser = async () => {
         if (!editingUser) return;
         try {
-            const res = await fetchWithAuth(`/api/admin/users/${editingUser.id}`, {
+            const res = await fetchWithAuth(API_ENDPOINTS.admin.userById(editingUser.id), {
                 method: 'PUT',
                 body: JSON.stringify(editForm)
             });
@@ -127,7 +128,7 @@ const AdminDashboard = () => {
                 showNotify('Benutzer aktualisiert', 'success');
                 setEditingUser(null);
                 // Refresh list
-                const refresh = await fetchWithAuth('/api/admin/users');
+                const refresh = await fetchWithAuth(API_ENDPOINTS.admin.users);
                 if (refresh && refresh.ok) setUsers(await refresh.json());
             } else {
                 showNotify('Fehler beim Aktualisieren', 'error');
@@ -141,7 +142,7 @@ const AdminDashboard = () => {
     const handleSaveSettings = async () => {
         setIsSaving(true);
         try {
-            const res = await fetchWithAuth('/api/admin/settings', {
+            const res = await fetchWithAuth(API_ENDPOINTS.admin.settings, {
                 method: 'POST',
                 body: JSON.stringify(settings)
             });
@@ -160,7 +161,7 @@ const AdminDashboard = () => {
         setIsTesting(true);
         try {
             const secretKey = settings.stripeLiveMode ? settings.stripeSecretKey : settings.stripeSandboxSecretKey;
-            const res = await fetchWithAuth('/api/admin/test-stripe', {
+            const res = await fetchWithAuth(API_ENDPOINTS.admin.testStripe, {
                 method: 'POST',
                 body: JSON.stringify({ stripeSecretKey: secretKey })
             });
@@ -190,7 +191,7 @@ const AdminDashboard = () => {
 
     const handleSavePlan = async () => {
         console.log("Saving Plan...", planForm);
-        const url = editingPlan ? `/api/admin/plans/${editingPlan.id}` : '/api/admin/plans';
+        const url = editingPlan ? API_ENDPOINTS.admin.planById(editingPlan.id) : API_ENDPOINTS.admin.plans;
         const method = editingPlan ? 'PUT' : 'POST';
 
         // Ensure numbers
@@ -213,7 +214,7 @@ const AdminDashboard = () => {
             if (res.ok) {
                 showNotify('Plan gespeichert', 'success');
                 setIsPlanModalOpen(false);
-                const refresh = await fetchWithAuth('/api/admin/plans');
+                const refresh = await fetchWithAuth(API_ENDPOINTS.admin.plans);
                 if (refresh && refresh.ok) setPlans(await refresh.json());
             } else {
                 const errData = await res.json();
@@ -318,7 +319,7 @@ const AdminDashboard = () => {
 
                                                 {u.account_status !== 'inactive' ? (
                                                     <button onClick={async () => {
-                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'PUT', body: JSON.stringify({ account_status: 'inactive' }) });
+                                                        const res = await fetchWithAuth(API_ENDPOINTS.admin.userById(u.id), { method: 'PUT', body: JSON.stringify({ account_status: 'inactive' }) });
                                                         if (res && res.ok) {
                                                             showNotify('User deaktiviert');
                                                             setUsers(users.map(user => user.id === u.id ? { ...user, account_status: 'inactive' } : user));
@@ -330,7 +331,7 @@ const AdminDashboard = () => {
                                                     </button>
                                                 ) : (
                                                     <button onClick={async () => {
-                                                        const res = await fetchWithAuth(`/api/admin/users/${u.id}`, { method: 'PUT', body: JSON.stringify({ account_status: 'active' }) });
+                                                        const res = await fetchWithAuth(API_ENDPOINTS.admin.userById(u.id), { method: 'PUT', body: JSON.stringify({ account_status: 'active' }) });
                                                         if (res && res.ok) {
                                                             showNotify('User aktiviert');
                                                             setUsers(users.map(user => user.id === u.id ? { ...user, account_status: 'active' } : user));
@@ -372,7 +373,7 @@ const AdminDashboard = () => {
                                         onClick={async () => {
                                             const userId = confirmDelete.id;
                                             setConfirmDelete(null);
-                                            const res = await fetchWithAuth(`/api/admin/users/${userId}`, { method: 'DELETE' });
+                                            const res = await fetchWithAuth(API_ENDPOINTS.admin.userById(userId), { method: 'DELETE' });
                                             if (res && res.ok) {
                                                 showNotify('User gelöscht');
                                                 setUsers(users.filter(user => user.id !== userId));
