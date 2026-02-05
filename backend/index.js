@@ -157,18 +157,37 @@ const sendEmail = async (to, templateType, data) => {
         const subject = replacePlaceholders(template.subject, data);
         const body = replacePlaceholders(template.body, data);
 
+        // Map environment variables (supporting both SMTP_ and MAIL_ prefixes)
+        const host = process.env.SMTP_HOST || process.env.MAIL_HOST;
+        const port = parseInt(process.env.SMTP_PORT || process.env.MAIL_PORT || 587);
+        const user = process.env.SMTP_USER || process.env.MAIL_USERNAME;
+        const pass = process.env.SMTP_PASS || process.env.MAIL_PASSWORD;
+        const from = process.env.SMTP_FROM || process.env.MAIL_FROM_ADDRESS || 'noreply@sublymaster.de';
+        
+        // Determine secure setting: true for port 465, false for 587 (STARTTLS)
+        // Or explicitly if SMTP_SECURE is true or MAIL_ENCRYPTION is ssl
+        const secure = (process.env.SMTP_SECURE === 'true') || 
+                       (process.env.MAIL_ENCRYPTION === 'ssl') || 
+                       (port === 465);
+
+        if (!host || !user || !pass) {
+            console.error('❌ Email configuration missing (Host/User/Pass). Please check .env');
+            return;
+        }
+
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT || 587,
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
+            host,
+            port,
+            secure,
+            auth: { user, pass },
+            tls: {
+                // Do not fail on invalid certs
+                rejectUnauthorized: false
             }
         });
 
         await transporter.sendMail({
-            from: process.env.SMTP_FROM || 'noreply@sublymaster.de',
+            from: `"${process.env.MAIL_FROM_NAME || 'Sublymaster'}" <${from}>`,
             to,
             subject,
             text: body,
