@@ -84,7 +84,8 @@ const AdminDashboard = () => {
                 })
                 .finally(() => setLoading(false));
         } else {
-            setLoading(false);
+            console.warn('Admin logged in but no token found. Forcing logout to clear session.');
+            logout();
         }
     }, [user, token]);
 
