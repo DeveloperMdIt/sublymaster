@@ -467,12 +467,18 @@ const AdminDashboard = () => {
                             </div>
                         )}
 
-                        <div className="flex gap-4 pt-6">
-                            <button onClick={handleTestStripe} disabled={isTesting} className="flex-1 border border-indigo-600 text-indigo-600 py-2 rounded hover:bg-indigo-50 transition-colors">
-                                {isTesting ? 'Teste...' : 'Verbindung Testen'}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                            <button onClick={handleTestStripe} disabled={isTesting} className="flex-1 border-2 border-indigo-600 text-indigo-600 font-bold py-3 rounded-xl hover:bg-indigo-50 transition-all flex items-center justify-center gap-2">
+                                <CreditCard size={18} />
+                                {isTesting ? 'Teste Stripe...' : 'Stripe Testen'}
                             </button>
-                            <button onClick={handleSaveSettings} disabled={isSaving} className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition-colors">
-                                {isSaving ? 'Speichere...' : 'Speichern'}
+                            <button onClick={handleTestEmail} disabled={isTesting} className="flex-1 border-2 border-amber-500 text-amber-600 font-bold py-3 rounded-xl hover:bg-amber-50 transition-all flex items-center justify-center gap-2">
+                                <Mail size={18} />
+                                {isTesting ? 'Teste Mail...' : 'SMTP Testen'}
+                            </button>
+                            <button onClick={handleSaveSettings} disabled={isSaving} className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 shadow-lg hover:shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+                                <Save size={18} />
+                                {isSaving ? 'Speichere...' : 'Einstellungen Speichern'}
                             </button>
                         </div>
                     </div>

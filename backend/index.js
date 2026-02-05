@@ -323,6 +323,20 @@ app.post('/api/admin/email-templates/test', authenticateAdmin, async (req, res) 
     }
 });
 
+// Test Email Connection
+app.post('/api/admin/test-email', authenticateAdmin, async (req, res) => {
+    try {
+        await sendEmail(req.user.email, 'welcome', {
+            name: 'Admin Test',
+            email: req.user.email
+        });
+        res.json({ success: true, message: "Test-E-Mail wurde erfolgreich versandt!" });
+    } catch (error) {
+        console.error("Mail-Fehler:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ============================================
 // ROUTES
 // ============================================
