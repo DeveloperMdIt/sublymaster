@@ -4,20 +4,30 @@ import { API_ENDPOINTS } from '../config/api';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    // Atomic initialization from localStorage
+    const [token, setToken] = useState(() => {
+        const t = localStorage.getItem('token');
+        console.log('🧪 Auth Bootstrap [Token]:', t ? (t.substring(0, 10) + '...') : 'MISSING');
+        return t;
+    });
+
+    const [user, setUser] = useState(() => {
+        try {
+            const u = localStorage.getItem('user');
+            console.log('🧪 Auth Bootstrap [User]:', u ? JSON.parse(u).email : 'MISSING');
+            return u ? JSON.parse(u) : null;
+        } catch (e) {
+            console.error('Failed to parse user from localStorage', e);
+            return null;
+        }
+    });
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const initAuth = async () => {
             if (token) {
-                // Try to load from local storage first for speed
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                }
-
-                // Then fetch fresh data from backend to ensure sync (credits, plan, names)
+                // Fetch fresh data from backend to ensure sync (credits, plan, names)
                 try {
                     const res = await fetch(API_ENDPOINTS.userProfile, {
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -38,6 +48,9 @@ export const AuthProvider = ({ children }) => {
                         };
                         setUser(updatedUser);
                         localStorage.setItem('user', JSON.stringify(updatedUser));
+                    } else if (res.status === 401 || res.status === 403) {
+                        console.warn("Invalid token detected during initAuth, logging out...");
+                        logout();
                     }
                 } catch (err) {
                     console.error("Auth sync failed", err);
