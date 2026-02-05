@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   // sonst localhost für die Entwicklung.
   const API_URL = env.VITE_API_URL || (mode === 'production' 
     ? 'https://sublymaster.de' 
-    : 'http://localhost:3000'); // Dein lokaler Backend-Port
+    : 'http://localhost:3001'); // Standardized Backend Port
 
   return {
     plugins: [react()],

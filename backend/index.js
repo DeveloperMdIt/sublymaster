@@ -9,7 +9,7 @@ const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001; // Standardized for Netcup
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key-change-me';
 
 // Database Connection
@@ -193,6 +193,28 @@ const db = new Database(DATABASE_URL);
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Health Check Endpoint
+app.get('/api/health', async (req, res) => {
+    const healthcheck = {
+        uptime: process.uptime(),
+        message: 'OK',
+        timestamp: Date.now(),
+        checks: {
+            database: false,
+            port: port
+        }
+    };
+
+    try {
+        await db.query('SELECT 1'); 
+        healthcheck.checks.database = true;
+        res.status(200).send(healthcheck);
+    } catch (error) {
+        healthcheck.message = error.message;
+        res.status(503).send(healthcheck);
+    }
+});
 
 // Helper for Auth Middleware
 const authenticateToken = (req, res, next) => {
