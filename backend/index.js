@@ -26,6 +26,18 @@ const db = new Database(DATABASE_URL);
         // --- AUTO-MIGRATION (Self-Healing Schema) ---
         console.log('🔄 Checking database schema...');
         
+        // [DIAGNOSTIC] Check users.id type
+        try {
+            const idTypeRes = await db.query("SELECT data_type FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'id'");
+            if (idTypeRes.rows.length > 0) {
+                console.log('📊 [DIAGNOSTIC] users.id type is:', idTypeRes.rows[0].data_type);
+            } else {
+                console.log('📊 [DIAGNOSTIC] users table does not exist yet.');
+            }
+        } catch (e) {
+            console.warn('📊 [DIAGNOSTIC] Could not check users.id type:', e.message);
+        }
+        
         // 0. Base Tables
         await db.run(`
             CREATE TABLE IF NOT EXISTS users (

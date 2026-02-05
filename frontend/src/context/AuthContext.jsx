@@ -94,8 +94,10 @@ export const AuthProvider = ({ children }) => {
                         setUser(updatedUser);
                         localStorage.setItem('user', JSON.stringify(updatedUser));
                     } else if (res.status === 401 || res.status === 403) {
-                        console.warn("Invalid token detected during initAuth, logging out...");
+                        console.warn("🧪 Auth Sync: Invalid token (401/403) during initAuth, logging out...");
                         logout();
+                    } else {
+                        console.error("🧪 Auth Sync: Unexpected status:", res.status);
                     }
                 } catch (err) {
                     console.error("Auth sync failed", err);

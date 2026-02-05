@@ -46,6 +46,7 @@ const LoginPage = () => {
             }
 
             // Success via Context
+            console.log('🧪 Login SUCCESS: data.user:', data.user?.email, 'data.token exists:', !!data.token);
             login(data.user, data.token);
 
             // Check Plan
