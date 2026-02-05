@@ -149,6 +149,7 @@ const CanvasEditor = () => {
     }, []); // Run ONLY on mount - prevents canvas reset when user object updates after saving offset
 
     const loadProjects = () => {
+        if (!token) return;
         fetch('/api/projects', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -156,7 +157,12 @@ const CanvasEditor = () => {
             .then(data => {
                 if (Array.isArray(data)) setProjects(data);
             })
-            .catch(err => console.error("Failed to load projects", err));
+            .catch(err => {
+                console.error("Failed to load projects", err);
+                if (err.name === 'SyntaxError') {
+                    console.warn("Server returned HTML instead of JSON. Check backend status.");
+                }
+            });
     };
 
 

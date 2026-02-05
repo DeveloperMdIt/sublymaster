@@ -40,7 +40,9 @@ export const AuthProvider = ({ children }) => {
                     }
                 } catch (err) {
                     console.error("Auth sync failed", err);
-                    // If 401, maybe logout? For now just ignore
+                    if (err.name === 'SyntaxError') {
+                        console.warn("Auth sync failed because server returned HTML instead of JSON. Check backend/nginx.");
+                    }
                 }
             }
             setLoading(false);
