@@ -74,9 +74,17 @@ export const AuthProvider = ({ children }) => {
             if (token) {
                 // Fetch fresh data from backend to ensure sync (credits, plan, names)
                 try {
+                    console.log(`🧪 Auth Sync: Fetching profile from ${API_ENDPOINTS.userProfile}`);
                     const res = await fetch(API_ENDPOINTS.userProfile, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json' // Explicitly request JSON
+                        }
                     });
+
+                    const contentType = res.headers.get('content-type');
+                    console.log(`🧪 Auth Sync: Status ${res.status}, Type: ${contentType}`);
+
                     if (res.ok) {
                         const data = await res.json();
                         // Merge essential data
@@ -91,19 +99,21 @@ export const AuthProvider = ({ children }) => {
                             last_name: data.last_name,
                             customer_number: data.customer_number
                         };
+                        console.log("🧪 Auth Sync: SUCCESS", updatedUser.email);
                         setUser(updatedUser);
                         localStorage.setItem('user', JSON.stringify(updatedUser));
                     } else if (res.status === 401 || res.status === 403) {
-                        console.warn("🧪 Auth Sync: Invalid token (401/403) during initAuth, logging out...");
+                        console.warn("🧪 Auth Sync: Invalid token (401/403), logging out...");
                         logout();
                     } else {
-                        console.error("🧪 Auth Sync: Unexpected status:", res.status);
+                        const text = await res.text();
+                        console.error("🧪 Auth Sync: Unexpected response:", res.status, text.substring(0, 100));
+                        if (text.includes('<!DOCTYPE html>') || text.includes('<html')) {
+                            console.error("⚠️ CRITICAL: Backend returned HTML instead of JSON. This usually means the Nginx/Apache proxy is not hitting the backend (Port 3001) and falling back to index.html.");
+                        }
                     }
                 } catch (err) {
                     console.error("Auth sync failed", err);
-                    if (err.name === 'SyntaxError') {
-                        console.warn("Auth sync failed because server returned HTML instead of JSON. Check backend/nginx.");
-                    }
                 }
             }
             setLoading(false);

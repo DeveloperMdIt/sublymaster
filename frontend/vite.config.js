@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // Hier "backen" wir die URL fest in den Code ein, 
       // falls sie über import.meta.env nicht gefunden wird
+      'import.meta.env.VITE_API_URL': JSON.stringify(API_URL),
       'process.env.VITE_API_URL': JSON.stringify(API_URL)
     },
     server: {
