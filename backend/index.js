@@ -36,7 +36,9 @@ const db = new Database(DATABASE_URL);
             ['credits', 'INTEGER DEFAULT 0'],
             ['account_status', 'VARCHAR(20) DEFAULT \'active\''],
             ['printer_model', 'VARCHAR(100)'],
-            ['default_offset', 'INTEGER DEFAULT 0']
+            ['default_offset', 'INTEGER DEFAULT 0'],
+            ['is_verified', 'BOOLEAN DEFAULT true'],
+            ['verification_token', 'VARCHAR(255)']
         ];
 
         for (const [col, type] of userColumns) {

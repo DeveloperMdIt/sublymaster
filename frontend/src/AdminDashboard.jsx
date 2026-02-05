@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Users, LayoutDashboard, CreditCard, Settings, FileText, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
+import { Users, LayoutDashboard, CreditCard, Settings, FileText, CheckCircle, AlertCircle, LogOut, X, Mail } from 'lucide-react';
+import Modal from './components/Modal';
 import Toast from './components/Toast';
 import AdminLayout from './components/admin/AdminLayout';
 import PrinterAnalytics from './components/admin/PrinterAnalytics';
