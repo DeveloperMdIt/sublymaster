@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Calendar, FileImage, Layers } from 'lucide-react';
-import API_ENDPOINTS from '../config/api';
+import { API_ENDPOINTS } from '../config/api';
 
 const PrintHistory = () => {
     const { token } = useAuth();

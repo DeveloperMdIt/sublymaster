@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, ShoppingBag, Clock } from 'lucide-react';
+import { API_ENDPOINTS } from '../config/api';
 
 export default function Transactions() {
     const { token } = useAuth();
@@ -12,7 +13,7 @@ export default function Transactions() {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
-                const res = await fetch('/api/transactions', {
+                const res = await fetch(API_ENDPOINTS.transactions, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -76,8 +77,8 @@ export default function Transactions() {
                                             <td className="px-8 py-6 text-sm text-gray-600 font-medium">{formatDate(t.timestamp)}</td>
                                             <td className="px-8 py-6">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${t.type === 'credits_buy' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                                                        t.type === 'plan_change' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' :
-                                                            'bg-gray-50 text-gray-700 border border-gray-100'
+                                                    t.type === 'plan_change' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' :
+                                                        'bg-gray-50 text-gray-700 border border-gray-100'
                                                     }`}>
                                                     {t.type === 'credits_buy' ? 'Guthaben' : t.type === 'plan_change' ? 'Abo' : t.type}
                                                 </span>

@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
     
     // History
     history: `${API_BASE_URL}/api/history`,
+    transactions: `${API_BASE_URL}/api/transactions`,
     
     // Admin
     admin: {

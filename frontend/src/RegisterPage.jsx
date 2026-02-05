@@ -3,7 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom'; // added 
 import { Check, X, Eye, EyeOff, Mail } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import Modal from './components/Modal';
-import API_ENDPOINTS from './config/api';
+import { API_ENDPOINTS } from './config/api';
 
 const RegisterPage = () => {
     const [searchParams] = useSearchParams();

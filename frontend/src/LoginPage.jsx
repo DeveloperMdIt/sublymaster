@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Modal from './components/Modal';
-import API_ENDPOINTS from './config/api';
+import { API_ENDPOINTS } from './config/api';
 
 const LoginPage = () => {
     const navigate = useNavigate();
