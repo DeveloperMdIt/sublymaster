@@ -1,6 +1,7 @@
 // API Configuration
-// Always use relative paths - works with Vite proxy in dev and same-origin in prod
-const API_BASE_URL = '';
+// Always use relative paths by default - works with Vite proxy in dev and same-origin in prod
+// Can be overridden via environment variables for cross-origin setups
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const API_ENDPOINTS = {
     // Auth
@@ -42,6 +43,7 @@ export const API_ENDPOINTS = {
         emailTemplates: `${API_BASE_URL}/api/admin/email-templates`,
         emailTemplateByType: (type) => `${API_BASE_URL}/api/admin/email-templates/${type}`,
         testEmail: `${API_BASE_URL}/api/admin/email-templates/test`,
+        testStripe: `${API_BASE_URL}/api/admin/test-stripe`,
         deploy: `${API_BASE_URL}/api/admin/deploy`,
         deployments: `${API_BASE_URL}/api/admin/deployments`,
     }
