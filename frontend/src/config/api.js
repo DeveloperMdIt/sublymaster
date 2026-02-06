@@ -1,7 +1,9 @@
 // API Configuration
 // Always use relative paths by default - works with Vite proxy in dev and same-origin in prod
 // Can be overridden via environment variables for cross-origin setups
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const envApiUrl = import.meta.env.VITE_API_URL || '';
+// Use relative path by default unless VITE_API_URL is an absolute URL
+const API_BASE_URL = (envApiUrl.startsWith('http')) ? envApiUrl : '';
 
 export const API_ENDPOINTS = {
     // Auth

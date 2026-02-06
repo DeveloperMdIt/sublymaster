@@ -8,23 +8,15 @@ export default defineConfig(({ mode }) => {
   // Definition der Fallback-URL: 
   // Wenn keine VITE_API_URL gesetzt ist, nimm in Produktion die echte Domain, 
   // sonst localhost für die Entwicklung.
-  const API_URL = env.VITE_API_URL || (mode === 'production' 
-    ? 'https://sublymaster.de' 
-    : 'http://localhost:3001'); // Standardized Backend Port
+  const API_TARGET = env.VITE_API_URL || 'http://localhost:3001';
 
   return {
     plugins: [react()],
-    define: {
-      // Hier "backen" wir die URL fest in den Code ein, 
-      // falls sie über import.meta.env nicht gefunden wird
-      'import.meta.env.VITE_API_URL': JSON.stringify(API_URL),
-      'process.env.VITE_API_URL': JSON.stringify(API_URL)
-    },
     server: {
       port: 5174,
       proxy: {
         '/api': {
-          target: API_URL,
+          target: API_TARGET,
           changeOrigin: true,
         }
       }
